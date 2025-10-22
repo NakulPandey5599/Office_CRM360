@@ -31,7 +31,7 @@ class FinalSelectionController extends Controller
         }
 
         // Send email using Laravel Mail
-        Mail::send('emails.prejoining', ['candidate' => $candidate], function($message) use ($candidate) {
+        Mail::send('hrms::emails.prejoining', ['candidate' => $candidate], function($message) use ($candidate) {
             $message->to($candidate->email, $candidate->full_name)
                     ->subject('Pre-Joining Form');
         });

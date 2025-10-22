@@ -25,7 +25,7 @@
     <li>
       <div class="dropdown-btn" onclick="toggleDropdown(this)"><i class="fas fa-handshake"></i> Onboarding & Confirmation <span class="arrow">▶</span></div>
       <div class="dropdown-container">
-        <a href="offerletter.html"><i class="fas fa-file-signature"></i> Offer Letter</a>
+        <a href="{{ route('offerLetter.index') }}"><i class="fas fa-file-signature"></i> Offer Letter</a>
         <a href="joining.html"><i class="fas fa-user-tie"></i> Joining Letter</a>
       </div>
     </li>

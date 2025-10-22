@@ -164,4 +164,19 @@ public function store(Request $request)
 
     public function update(Request $request, $id) {}
     public function destroy($id) {}
+
+public function searchExperiencedEmployee(Request $request)
+{
+    $query = $request->get('query');
+
+    $results = ExperiencedEmployee::query()
+        ->where('first_name', 'LIKE', "%{$query}%")
+        ->orWhere('last_name', 'LIKE', "%{$query}%")
+        ->orWhere('job_profile', 'LIKE', "%{$query}%")
+        ->limit(10)
+        ->get(['id', 'first_name', 'last_name', 'job_profile']);
+
+    return response()->json($results);
 }
+}
+
