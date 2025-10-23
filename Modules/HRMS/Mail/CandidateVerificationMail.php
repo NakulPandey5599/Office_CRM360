@@ -10,26 +10,41 @@ class CandidateVerificationMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $candidate;
-    public $hrName;
-    public $attachments;
+    public array $candidate;
+    public string $hrName;
 
-    public function __construct($candidate, $hrName, $attachments = [])
+    /**
+     * Create a new message instance.
+     *
+     * @param array $candidate
+     * @param string $hrName
+     * @param array $attachments
+     */
+    public function __construct(array $candidate, string $hrName, array $attachments = [])
     {
         $this->candidate = $candidate;
         $this->hrName = $hrName;
-        $this->attachments = $attachments;
+
+        // Attach files using the parent Mailable's attach() method
+        foreach ($attachments as $file) {
+            if (file_exists($file)) {
+                $this->attach($file);
+            }
+        }
     }
 
+    /**
+     * Build the message.
+     *
+     * @return $this
+     */
     public function build()
     {
-        $email = $this->subject('Candidate Data Verification')
-                      ->view('hrms::emails.candidate_verification');
-
-        foreach ($this->attachments as $file) {
-            $email->attach(storage_path('app/public/' . $file));
-        }
-
-        return $email;
+        return $this->subject('Candidate Verification')
+                    ->view('hrms::emails.candidate_verification')
+                    ->with([
+                        'candidate' => $this->candidate,
+                        'hrName' => $this->hrName,
+                    ]);
     }
 }

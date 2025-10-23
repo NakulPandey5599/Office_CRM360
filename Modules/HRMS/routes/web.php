@@ -52,3 +52,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
   Route::post('hrms/offer-letter/store', [OfferLetterController::class, 'store'])->name('offerLetter.store');
   Route::post('hrms/offer/send-email/{id}', [OfferLetterController::class, 'sendOfferEmail'])->name('offer.sendEmail');
 
+  Route::get('/test-mail', function () {
+    try {
+        Mail::raw('Test email body', function($message) {
+            $message->to('hr_email@example.com')
+                    ->subject('Test Email');
+        });
+        return 'Email sent!';
+    } catch (\Exception $e) {
+        return 'Email failed: ' . $e->getMessage();
+    }
+});
+
+

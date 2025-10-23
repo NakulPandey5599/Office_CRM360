@@ -165,9 +165,22 @@
             </ul>
         </div>
     </div>
-
+                             
     <!-- Main content -->
     <div class="main-content34">
+        <div id="notification" style="
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #28a745; /* green for success */
+    color: white;
+    padding: 15px 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    display: none;
+    z-index: 9999;
+"></div>
+
         <div class="top-bar34">
             <div>HR Management System</div>
             <div>Admin <button class="logout-btn34">Logout</button></div>
@@ -210,6 +223,11 @@
                     <form action="{{ route('dataVerification.store') }}" method="POST"
                         enctype="multipart/form-data">
                         @csrf
+                        <input type="hidden" name="candidate_name" id="candidate_name">
+                        {{-- <input type="hidden" name="candidate_department" id="candidate_department">
+                        <input type="hidden" name="candidate_id" id="candidate_id"> --}}
+
+
                         <div class="request-grid34">
                             <input type="text" name="previous_company_name" placeholder="Previous Company Name">
                             <input type="text" name="hr_contact_name" placeholder="HR Contact Name">
@@ -342,12 +360,40 @@
     `);
                 $('.profile-status34').text('Pending');
 
+                 // Fill hidden fields
+                //  $('#candidate_department').val(dept);
+                 $('#candidate_name').val(name);
+                //  $('#candidate_id').val(id);
+
+                 
+
                 // Close search results
                 $('#searchResults').html('');
                 $('#searchInput').val('');
+                
             });
 
         });
+         
+    const notification = document.getElementById('notification');
+
+    @if(session('success'))
+        notification.textContent = '{{ session('success') }}';
+        notification.style.backgroundColor = '#28a745'; // green
+        notification.style.display = 'block';
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 3000); // hide after 3 sec
+    @endif
+
+    @if(session('error'))
+        notification.textContent = '{{ session('error') }}';
+        notification.style.backgroundColor = '#dc3545'; // red
+        notification.style.display = 'block';
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 4000); // hide after 4 sec
+    @endif
     </script>
 
 </body>
