@@ -178,5 +178,51 @@ public function searchExperiencedEmployee(Request $request)
 
     return response()->json($results);
 }
+
+
+public function search(Request $request)
+{
+    $query = $request->input('query');
+
+    // Search in experienced employees
+    $experienced = DB::table('experienced_employees')
+        ->where('first_name', 'like', "%{$query}%")
+        ->orWhere('last_name', 'like', "%{$query}%")
+        ->select(
+            'id', 
+            DB::raw("CONCAT(first_name, ' ', last_name) as name"),
+            'job_profile',
+            DB::raw("'experienced' as type")
+        )
+        ->limit(10)
+        ->get();
+
+    // Search in fresher employees
+    $freshers = DB::table('freshers_employees')
+        ->where('first_name', 'like', "%{$query}%")
+        ->orWhere('last_name', 'like', "%{$query}%")
+        ->select(
+            'id', 
+            DB::raw("CONCAT(first_name, ' ', last_name) as name"),
+            'job_profile',
+            DB::raw("'fresher' as type")
+        )
+        ->limit(10)
+        ->get();
+
+    // Merge both results
+    $results = $experienced->merge($freshers);
+
+    return response()->json($results);
+}
+
+
+
+
+
+
+
+
+
 }
 

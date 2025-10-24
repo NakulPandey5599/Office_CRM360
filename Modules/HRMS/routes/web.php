@@ -41,7 +41,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
   Route::get('hrms/data-verification', [DataVerificationController::class, 'index'])->name('dataVerification.index');
   Route::get('hrms/data-verification/{id}', [DataVerificationController::class, 'show'])->name('dataVerification.show');
   Route::post('hrms/data-verification/store', [DataVerificationController::class, 'store'])->name('dataVerification.store');
-  Route::get('/search-candidates', [NewCandidateController::class, 'search'])->name('candidates.search');
+  
 
 
   // Send Email Route
@@ -50,18 +50,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
   //offer letter route
   Route::get('hrms/offer-letter', [OfferLetterController::class, 'index'])->name('offerLetter.index');
   Route::post('hrms/offer-letter/store', [OfferLetterController::class, 'store'])->name('offerLetter.store');
-  Route::post('hrms/offer/send-email/{id}', [OfferLetterController::class, 'sendOfferEmail'])->name('offer.sendEmail');
+  Route::post('hrms/offer/send-email', [OfferLetterController::class, 'sendOfferEmail'])->name('offer.sendEmail');
+  Route::get('/search-candidates', [OfferLetterController::class, 'searchCandidates'])->name('searchCandidates');
+  Route::get('/hrms/offerletter/search', [OfferLetterController::class, 'search'])->name('offerLetter.search');
 
-  Route::get('/test-mail', function () {
-    try {
-        Mail::raw('Test email body', function($message) {
-            $message->to('hr_email@example.com')
-                    ->subject('Test Email');
-        });
-        return 'Email sent!';
-    } catch (\Exception $e) {
-        return 'Email failed: ' . $e->getMessage();
-    }
-});
 
 

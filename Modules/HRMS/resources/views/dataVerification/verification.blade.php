@@ -299,6 +299,7 @@
                 document.getElementById(btnId).textContent = "✅ " + input.files[0].name;
             }
         }
+        
         $(document).ready(function() {
             // 🔍 Search as user types
             $('#searchInput').on('keyup', function() {
