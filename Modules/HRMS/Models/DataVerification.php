@@ -16,13 +16,16 @@ class DataVerification extends Model
       protected $table = 'data_verification';
 
     protected $fillable = [
-
+        'candidate_id',
+        'candidate_department',
+        'candidate_name',
         'previous_company_name',
         'hr_contact_name',
         'hr_contact_email',
         'hr_contact_phone',
         'receiving_letter',
         'experience_certificate',
+        'status',
 
     ];
 

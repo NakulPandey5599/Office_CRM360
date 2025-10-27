@@ -3,6 +3,7 @@
 namespace Modules\HRMS\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Modules\HRMS\Models\Candidates;
 use App\Http\Controllers\Controller;
@@ -130,4 +131,30 @@ class OfferLetterController extends Controller
 
         return response()->json($results);
     }
+
+
+
+public function downloadPDF(Request $request)
+{
+    $data = $request->all();
+
+    $pdf = Pdf::loadView('hrms::offerLetter.offer_letter_pdf', [
+        'candidate_name' => $data['candidate_name'] ?? 'Unknown',
+        'designation'    => $data['designation'] ?? 'N/A',
+        'department'     => $data['department'] ?? 'N/A',
+        'joining_date'   => $data['joining_date'] ?? 'N/A',
+        'location'       => $data['location'] ?? 'N/A',
+        'ctc'            => $data['ctc'] ?? 'N/A',
+    ]);
+
+    return response($pdf->output(), 200)
+        ->header('Content-Type', 'application/pdf')
+        ->header('Content-Disposition', 'attachment; filename="' . $data['candidate_name'] . '_Offer_Letter.pdf"');
+}
+
+
+
+
+
+
 }

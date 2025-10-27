@@ -245,7 +245,7 @@
             </form>
 
             <div class="offer-preview-actions" id="offerPreviewActions">
-                <button class="offer-btn-download">📥 Download</button>
+                <button type="button" class="offer-btn-download" id="downloadOfferPDF">📥 Download PDF</button>
                 <button class="offer-btn-print" onclick="window.print()">🖨️ Print</button>
                 <button type="button" class="offer-btn-email" id="sendOfferEmailBtn">✉️ Send via Email</button>
             </div>
@@ -435,6 +435,41 @@
             });
 
         });
+        $('.offer-btn-download').on('click', function () {
+    const data = {
+        candidate_name: $('#offerNameInput').val(),
+        designation: $('#offerDesignationInput').val(),
+        department: $('#offerDeptInput').val(),
+        joining_date: $('#offerDateInput').val(),
+        location: $('#offerLocationInput').val(),
+        ctc: $('#offerCtcInput').val(),
+        _token: $('meta[name="csrf-token"]').attr('content')
+    };
+
+    fetch("{{ route('hrms.offer.download') }}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': data._token
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Failed to generate PDF');
+        return response.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${data.candidate_name}_Offer_Letter.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+    })
+    .catch(() => alert('Error downloading PDF!'));
+});
+
     </script>
 </body>
 

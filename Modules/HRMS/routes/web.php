@@ -36,13 +36,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
   Route::get('hrms/pre-joining-process/experienced', [PreJoiningProcessController::class, 'experienced'])->name('preJoiningProcess.experienced');
   Route::get('hrms/pre-joining-process/fresher', [PreJoiningProcessController::class, 'fresher'])->name('preJoiningProcess.fresher');
   Route::post('hrms/pre-joining-process/store', [PreJoiningProcessController::class, 'store'])->name('preJoiningProcess.store');
-  Route::get('/search-experienced-employee', [PreJoiningProcessController::class, 'searchExperiencedEmployee'])->name('experienced_employee.search');
 
   // Data Verification Routes
   Route::get('hrms/data-verification', [DataVerificationController::class, 'index'])->name('dataVerification.index');
   Route::get('hrms/data-verification/{id}', [DataVerificationController::class, 'show'])->name('dataVerification.show');
   Route::post('hrms/data-verification/store', [DataVerificationController::class, 'store'])->name('dataVerification.store');
-  
+  Route::get('/search-experienced-employee', [DataVerificationController::class, 'searchExperiencedEmployee'])->name('experienced_employee.search');
+  Route::get('/hrms/verify-response', [DataVerificationController::class, 'verifyResponse']);
+  Route::get('/get-candidate-verification/{id}', [DataVerificationController::class, 'getCandidateVerification']);
+
 
 
   // Send Email Route
@@ -54,9 +56,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
   Route::post('hrms/offer/send-email', [OfferLetterController::class, 'sendOfferEmail'])->name('offer.sendEmail');
   Route::get('/search-candidates', [OfferLetterController::class, 'searchCandidates'])->name('searchCandidates');
   Route::get('/hrms/offerletter/search', [OfferLetterController::class, 'search'])->name('offerLetter.search');
+  Route::post('/hrms/offer-letter/download', [OfferLetterController::class, 'downloadPDF'])->name('hrms.offer.download');
+
 
   Route::get('/hrms/joining-letter',[JoiningLetterController::class, 'index'])->name('joiningLetter.index');
   Route::post('hrms/joining-letter/store', [JoiningLetterController::class, 'store'])->name('joining-letter.store');
   Route::get('/hrms/joining-letter/search', [JoiningLetterController::class, 'search'])->name('joining-letter.search');
   Route::post('/hrms/joining-letter/send-email', [JoiningLetterController::class, 'sendEmail'])->name('joining-letter.sendEmail');
-
+  Route::post('/hrms/joining-letter/download', [JoiningLetterController::class, 'downloadPDF'])->name('hrms.joining.download');

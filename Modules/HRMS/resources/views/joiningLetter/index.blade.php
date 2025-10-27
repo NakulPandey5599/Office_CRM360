@@ -282,7 +282,7 @@
 </div>
 
             <div class="joining-preview-actions" id="previewActions">
-                <button class="joining-btn-download">📥 Download</button>
+                <button type="button" class="joining-btn-download" onclick="downloadPDF()">📥 Download</button>
                 <button class="joining-btn-print" onclick="window.print()">🖨️ Print</button>
                 <button class="joining-btn-email">✉️ Send via Email</button>
             </div>
@@ -465,6 +465,35 @@ $(document).on('click', '.joining-btn-email', function () {
         showToast('Error sending email!', 'error');
     });
 });
+
+function downloadPDF() {
+    const data = {
+        candidate_name: $('#profileName').text(),
+        designation: $('#designation').val(),
+        department: $('#department').val(),
+        joining_date: $('#joiningDate').val(),
+        location: $('#location').val(),
+    };
+
+    fetch('/hrms/joining-letter/download', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${data.candidate_name}_Joining_Letter.pdf`;
+        link.click();
+    })
+    .catch(() => {
+        showToast('Error generating PDF!', 'error');
+    });
+}
 
     </script>
 

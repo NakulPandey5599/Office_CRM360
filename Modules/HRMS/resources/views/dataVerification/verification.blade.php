@@ -224,8 +224,8 @@
                         enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="candidate_name" id="candidate_name">
-                        {{-- <input type="hidden" name="candidate_department" id="candidate_department">
-                        <input type="hidden" name="candidate_id" id="candidate_id"> --}}
+                        <input type="hidden" name="candidate_department" id="candidate_department">
+                        <input type="hidden" name="candidate_id" id="candidate_id"> 
 
 
                         <div class="request-grid34">
@@ -272,11 +272,26 @@
                 </div>
 
                 <div class="card34">
-                    <h3>Verification History</h3>
-                    <div class="list-item34"><span>John Doe</span> <span class="verified34">Verified</span></div>
-                    <div class="list-item34"><span>Rita Singh</span> <span class="pending34">Pending</span></div>
-                    <div class="list-item34"><span>Amit Kumar</span> <span class="rejected34">Rejected</span></div>
-                </div>
+    <h3>Verification History</h3>
+
+    @forelse ($dataVerification as $item)
+        @php
+            $statusClass = match($item->status) {
+                'verified' => 'verified34',
+                'rejected' => 'rejected34',
+                default => 'pending34'
+            };
+        @endphp
+
+        <div class="list-item34">
+            <span>{{ $item->candidate_name ?? 'N/A' }}</span>
+            <span class="{{ $statusClass }}">{{ ucfirst($item->status) }}</span>
+        </div>
+    @empty
+        <p>No verification records yet.</p>
+    @endforelse
+</div>
+
             </div>
         </div>
     </div>
@@ -352,26 +367,58 @@
                 let dept = $(this).data('job');
                 let id = $(this).data('id');
 
+                    // ✅ Fill hidden fields for form submission
+                    $('#candidate_name').val(name);
+                    $('#candidate_department').val(dept);
+                    $('#candidate_id').val(id);
+
                 // Update candidate profile section dynamically
                 $('.profile-info34').html(`
-        <p><b>Name:</b> ${name}</p>
-        <p><b>Employee ID:</b> ${id}</p>
-        <p><b>Department:</b> ${dept}</p>
-        <p><b>Joining Date:</b> N/A</p>
-    `);
-                $('.profile-status34').text('Pending');
+    <p><b>Name:</b> ${name}</p>
+    <p><b>Employee ID:</b> ${id}</p>
+    <p><b>Department:</b> ${dept}</p>
+    <p><b>Joining Date:</b> N/A</p>
+`);
+$('.profile-status34').text('Loading...');
 
-                 // Fill hidden fields
-                //  $('#candidate_department').val(dept);
-                 $('#candidate_name').val(name);
-                //  $('#candidate_id').val(id);
+    // ✅ Fill hidden field properly
+    $('#candidate_name').val(name);
+    $('#candidate_department').val(dept);
+    $('#candidate_id').val(id);
 
-                 
 
-                // Close search results
+// Fetch verification info for selected candidate
+$.ajax({
+    url: `/get-candidate-verification/${id}`,
+    type: 'GET',
+    success: function(data) {
+        $('.profile-status34').text(data.status);
+
+        // Fill HR response section
+        $('.card34:contains("HR Response")').html(`
+            <h3>HR Response</h3>
+            <p><b>HR Name:</b> ${data.hr_contact_name ?? 'N/A'}</p>
+            <p><b>Email:</b> ${data.hr_contact_email ?? 'N/A'}</p>
+            <p><b>Verification Result:</b> <span class="${data.status === 'verified' ? 'verified34' : 'pending34'}">${data.status}</span></p>
+        `);
+    },
+    error: function() {
+        $('.profile-status34').text('Pending');
+        $('.card34:contains("HR Response")').html(`
+            <h3>HR Response</h3>
+            <p><b>HR Name:</b> N/A</p>
+            <p><b>Email:</b> N/A</p>
+            <p><b>Verification Result:</b> <span class="pending34">Awaiting Response</span></p>
+        `);
+    }
+});
+                // Clear search results
                 $('#searchResults').html('');
-                $('#searchInput').val('');
-                
+
+                // Set hidden input for form submission
+                $('#candidate_name').val(name);
+                // $('#candidate_department').val(dept);
+                // $('#candidate_id').val(id);  
             });
 
         });

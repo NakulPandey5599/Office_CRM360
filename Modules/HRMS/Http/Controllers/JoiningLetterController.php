@@ -3,8 +3,10 @@
 namespace Modules\HRMS\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use PhpParser\Node\Stmt\TryCatch;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Auth\Events\Validated;
@@ -100,6 +102,37 @@ class JoiningLetterController extends Controller
             return response()->json(['message' => 'Error sending email: ' . $e->getMessage()], 500);
         }
     }
+
+   
+
+
+public function downloadPDF(Request $request)
+{
+    try {
+        $data = $request->all();
+
+        // Log data for debugging
+        Log::info('PDF Data:', $data);
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('hrms::joiningLetter.joining_letter_pdf', [
+            'name' => $data['candidate_name'] ?? 'Unknown',
+            'designation' => $data['designation'] ?? 'N/A',
+            'department' => $data['department'] ?? 'N/A',
+            'joining_date' => $data['joining_date'] ?? 'N/A',
+            'location' => $data['location'] ?? 'N/A',
+        ]);
+
+        return response($pdf->output(), 200)
+            ->header('Content-Type', 'application/pdf')
+            ->header('Content-Disposition', 'attachment; filename="' . ($data['candidate_name'] ?? 'Employee') . '_Joining_Letter.pdf"');
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'PDF generation failed',
+            'message' => $e->getMessage(),
+        ], 500);
+    }
+}
 
 
 
