@@ -216,7 +216,7 @@
                 <div class="offer-generator-section">
                     <div class="offer-generator-form">
                         <div class="offer-form-group"><label>Candidate ID</label>
-                            <input type="text" id="offerCandIdInput" name="candidate_id_display">
+                            <input type="text" id="offerCandIdInput" name="candidate_id">
                         </div>
                         <div class="offer-form-group"><label>Candidate Name</label>
                             <input type="text" id="offerNameInput" name="candidate_name" value="Rohit Kumar">

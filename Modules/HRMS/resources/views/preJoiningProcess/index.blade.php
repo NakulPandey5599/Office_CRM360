@@ -99,7 +99,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display:fle
       <div class="dropdown-btn" onclick="toggleDropdown(this)"><i class="fas fa-handshake"></i> Onboarding & Confirmation <span class="arrow">▶</span></div>
       <div class="dropdown-container">
         <a href="{{ route('offerLetter.index') }}"><i class="fas fa-file-signature"></i> Offer Letter</a>
-        <a href="joining.html"><i class="fas fa-user-tie"></i> Joining Letter</a>
+        <a href="{{ route('joiningLetter.index') }}"><i class="fas fa-user-tie"></i> Joining Letter</a>
       </div>
     </li>
     <li><a href="training.html"><i class="fas fa-chalkboard-teacher"></i> Training & Assessment</a></li>

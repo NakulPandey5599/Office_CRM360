@@ -11,6 +11,7 @@ use Modules\HRMS\Http\Controllers\FinalSelectionController;
 use Modules\HRMS\Http\Controllers\DataVerificationController;
 use Modules\HRMS\Http\Controllers\PreJoiningProcessController;
 use Illuminate\Support\Facades\Mail;
+use Modules\HRMS\Http\Controllers\JoiningLetterController;
 use Modules\HRMS\Http\Controllers\OfferLetterController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -54,5 +55,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
   Route::get('/search-candidates', [OfferLetterController::class, 'searchCandidates'])->name('searchCandidates');
   Route::get('/hrms/offerletter/search', [OfferLetterController::class, 'search'])->name('offerLetter.search');
 
-
+  Route::get('/hrms/joining-letter',[JoiningLetterController::class, 'index'])->name('joiningLetter.index');
+  Route::post('hrms/joining-letter/store', [JoiningLetterController::class, 'store'])->name('joining-letter.store');
+  Route::get('/hrms/joining-letter/search', [JoiningLetterController::class, 'search'])->name('joining-letter.search');
+  Route::post('/hrms/joining-letter/send-email', [JoiningLetterController::class, 'sendEmail'])->name('joining-letter.sendEmail');
 

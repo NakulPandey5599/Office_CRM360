@@ -10,9 +10,9 @@ class OfferLetter extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     */
+
+    protected $table = 'offer_letters';
+    
     protected $fillable = [
         'candidate_id',
         'candidate_name',
