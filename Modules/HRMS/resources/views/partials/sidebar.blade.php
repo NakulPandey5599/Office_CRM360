@@ -1,4 +1,3 @@
-
 <!-- Sidebar -->
 <div class="sidebar">
 <h2>HRMS</h2>
@@ -13,11 +12,11 @@
 <div class="menu-section">
   <h3 onclick="toggleMenu(this)"><i class="fas fa-briefcase menu-icon"></i> HR Management <span class="arrow">▶</span></h3>
   <ul class="submenu">
-    <li><a href="index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+    <li><a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> Dashboard</a></li>
     <li>
       <div class="dropdown-btn" onclick="toggleDropdown(this)"><i class="fas fa-user-plus"></i> Employee Management <span class="arrow">▶</span></div>
       <div class="dropdown-container">
-        <a href="{{ route('candidate.create') }}"><i class="fas fa-pen"></i> Candidate Registration</a>
+        <a href="{{ route('recruitment.index') }}"><i class="fas fa-pen"></i> Candidate Registration</a>
         <a href="{{ route('preJoiningProcess.index') }}"><i class="fas fa-user-check"></i> Pre-Joining Process</a>
         <a href="{{ route('dataVerification.index') }}"><i class="fas fa-id-card"></i> Data Verification</a>
       </div>
@@ -26,11 +25,11 @@
       <div class="dropdown-btn" onclick="toggleDropdown(this)"><i class="fas fa-handshake"></i> Onboarding & Confirmation <span class="arrow">▶</span></div>
       <div class="dropdown-container">
         <a href="{{ route('offerLetter.index') }}"><i class="fas fa-file-signature"></i> Offer Letter</a>
-        <a href="joining.html"><i class="fas fa-user-tie"></i> Joining Letter</a>
+        <a href="{{ route('joiningLetter.index') }}"><i class="fas fa-user-tie"></i> Joining Letter</a>
       </div>
     </li>
-    <li><a href="training.html"><i class="fas fa-chalkboard-teacher"></i> Training & Assessment</a></li>
-    <li><a href="reports.html"><i class="fas fa-chart-bar"></i> Reports</a></li>
+    <li><a href="{{ route('trainingAssessment.index') }}"><i class="fas fa-chalkboard-teacher"></i> Training & Assessment</a></li>
+    <li><a href="{{ route('report.index') }}"><i class="fas fa-chart-bar"></i> Reports</a></li>
   </ul>
 </div>
 <!-- Employee, Leaves, Shifts, Payroll Sections as in your previous sidebar -->
@@ -66,4 +65,3 @@
   </ul>
 </div>
 </div>
-<!-- End of Sidebar -->

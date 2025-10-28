@@ -15,7 +15,6 @@
             display: flex;
         }
 
-        /* Sidebar */
         .sidebar {
             width: 240px;
             background: linear-gradient(to right, #90caf9, #047edf 99%) !important;
@@ -56,14 +55,12 @@
             color: #047edf !important;
         }
 
-        /* Main content */
         .main-content {
             margin-left: 240px;
             flex: 1;
             padding: 30px;
         }
 
-        /* Header */
         .header {
             display: flex;
             align-items: center;
@@ -88,7 +85,6 @@
             transform: scale(1.2);
         }
 
-        /* Table */
         .table-container {
             max-width: 1000px;
             margin: 0 auto;
@@ -135,6 +131,11 @@
             background: #047857;
         }
 
+        .already-sent {
+            background: #9ca3af !important;
+            cursor: not-allowed;
+        }
+
         .popup {
             position: fixed;
             top: 20px;
@@ -157,21 +158,18 @@
             opacity: 0.95;
         }
 
-        /* Success (green) */
         .popup-content.success {
             border-left: 6px solid #22c55e;
             color: #166534;
             background: #dcfce7;
         }
 
-        /* Error (red) */
         .popup-content.error {
             border-left: 6px solid #ef4444;
             color: #7f1d1d;
             background: #fee2e2;
         }
 
-        /* Animation */
         @keyframes slideDown {
             from {
                 transform: translate(-50%, -30px);
@@ -188,30 +186,17 @@
 
 <body>
 
-    <!-- Sidebar -->
     <div class="sidebar">
         <h2>Recruitment</h2>
         <a href="{{ route('recruitment.index') }}">Dashboard</a>
-        <!-- <a href="candidate.html">Candidate Details</a>
-    <a href="interview.html">Interview Status</a>
-    <a href="final.html" class="active">Final Selections</a> -->
     </div>
 
-    <!-- Main Content -->
     <div class="main-content">
         <div class="header">
             <span class="back" onclick="goToDashboard()">&#8592;</span>
             Final Selections
         </div>
-        @if (session('success') || session('error'))
-            <div id="customPopup" class="popup">
-                <div class="popup-content {{ session('error') ? 'error' : 'success' }}">
-                    <h2>{{ session('error') ? 'Error ' : 'Success' }}</h2>
-                    <p>{{ session('error') ?? session('success') }}</p>
-                    <button onclick="closePopup()">OK</button>
-                </div>
-            </div>
-        @endif
+
         <div class="table-container">
             <table>
                 <thead>
@@ -223,46 +208,78 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        @if ($finalSelection->count() > 0)
-                            @foreach ($finalSelection as $selection)
-                    <tr>
-                        <td>{{ $selection->full_name }}</td>
-                        <td>{{ $selection->job_profile }}</td>
-                        <td>{{ $selection->final_selection }}</td>
-                        <td>
-                            <form action="{{ route('candidate.sendEmail', $selection->id) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="btn-send-email">Send Email</button>
-                            </form>
-                        </td>
-                    </tr>
-                    @endforeach
-                @else
-                    </tr>
-                    <td colspan="3" style="color: #9ca3af; font-style: italic;">No final selections yet</td>
-                    </tr>
-                    @endif
+                    @forelse ($finalSelection as $selection)
+                        <tr>
+                            <td>{{ $selection->full_name }}</td>
+                            <td>{{ $selection->job_profile }}</td>
+                            <td>{{ $selection->final_selection }}</td>
+                            <td>
+                                <button class="btn-send-email {{ $selection->email_sent ? 'already-sent' : '' }}"
+                                    data-id="{{ $selection->id }}"
+                                    {{ $selection->email_sent ? 'disabled' : '' }}>
+                                    {{ $selection->email_sent ? 'Already Sent' : 'Send Email' }}
+                                </button>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" style="color: #9ca3af; font-style: italic;">No final selections yet</td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         function goToDashboard() {
-            window.location.href = "reg.html"; // your dashboard page
+            window.location.href = "{{ route('recruitment.index') }}";
         }
 
-        // Close popup when OK button clicked
-        function closePopup() {
-            document.getElementById('customPopup').style.display = 'none';
+        function showPopup(message, type) {
+            const popup = $('<div class="popup"><div class="popup-content ' + type + '">' + message + '</div></div>');
+            $('body').append(popup);
+            setTimeout(() => popup.fadeOut(500, () => popup.remove()), 3000);
         }
 
-        // Optional: Auto-close popup after 3 seconds
-        setTimeout(() => {
-            const popup = document.getElementById('customPopup');
-            if (popup) popup.style.display = 'none';
-        }, 3000);
+        $(document).on('click', '.btn-send-email', function(e) {
+            e.preventDefault();
+            const button = $(this);
+            const candidateId = button.data('id');
+
+            if (button.hasClass('already-sent')) {
+                if (!confirm("This email was already sent. Send again?")) return;
+            }
+
+            button.prop('disabled', true).text('Sending...');
+
+            $.ajax({
+                url: '/hrms/send-email/' + candidateId,
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        button.text('Already Sent')
+                            .addClass('already-sent')
+                            .css({
+                                background: '#9ca3af',
+                                cursor: 'not-allowed'
+                            });
+                        showPopup('✅ ' + response.message, 'success');
+                    } else {
+                        showPopup('❌ ' + response.message, 'error');
+                        button.prop('disabled', false).text('Send Email');
+                    }
+                },
+                error: function() {
+                    showPopup('❌ Something went wrong!', 'error');
+                    button.prop('disabled', false).text('Send Email');
+                }
+            });
+        });
     </script>
 </body>
 

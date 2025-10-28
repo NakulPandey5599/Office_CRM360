@@ -83,92 +83,12 @@
 <body class="data">
 
     <!-- Sidebar -->
-    <div class="sidebar">
-        <h2>HRMS</h2>
-        <div class="menu-section">
-            <h3>
-                <a href="main.html"
-                    style="color:white; text-decoration:none; display:flex; align-items:center; gap:10px;">
-                    <i class="fas fa-home"></i> Dashboard
-                </a>
-            </h3>
-        </div>
+    @include('hrms::partials.sidebar')
 
-        <!-- HR Management -->
-        <div class="menu-section">
-            <h3 onclick="toggleMenu(this)"><i class="fas fa-briefcase"></i> HR Management <span class="arrow">▶</span>
-            </h3>
-            <ul class="submenu">
-                <li><a href="index.html"><i class="fas fa-home"></i> Dashboard</a></li>
-                <li>
-                    <div class="dropdown-btn" onclick="toggleDropdown(this)"><i class="fas fa-user-plus"></i> Employee
-                        Management <span class="arrow">▶</span></div>
-                    <div class="dropdown-container">
-                        <a href="{{ route('candidate.create') }}"><i class="fas fa-pen"></i> Candidate Registration</a>
-                        <a href="{{ route('preJoiningProcess.index') }}"><i class="fas fa-user-check"></i> Pre-Joining
-                            Process</a>
-                        <a href="{{ route('dataVerification.index') }}" class="active"><i class="fas fa-id-card"></i>
-                            Data Verification</a>
-                    </div>
-                </li>
-                <li>
-                    <div class="dropdown-btn" onclick="toggleDropdown(this)"><i class="fas fa-handshake"></i> Onboarding
-                        & Confirmation <span class="arrow">▶</span></div>
-                    <div class="dropdown-container">
-                        <a href="offerletter.html"><i class="fas fa-file-signature"></i> Offer Letter</a>
-                        <a href="joining.html"><i class="fas fa-user-tie"></i> Joining Letter</a>
-                    </div>
-                </li>
-                <li><a href="training.html"><i class="fas fa-chalkboard-teacher"></i> Training & Assessment</a></li>
-                <li><a href="reports.html"><i class="fas fa-chart-bar"></i> Reports</a></li>
-
-            </ul>
-        </div>
-
-        <!-- Employee -->
-        <div class="menu-section">
-            <h3 onclick="toggleMenu(this)"><i class="fas fa-user-tie"></i> Employee <span class="arrow">▶</span></h3>
-            <ul class="submenu">
-                <li><a href="#"><i class="fas fa-users"></i> Employees</a></li>
-                <li><a href="#"><i class="fas fa-building"></i> Department</a></li>
-                <li><a href="#"><i class="fas fa-id-badge"></i> Designation</a></li>
-                <li><a href="#"><i class="fas fa-award"></i> Appreciation</a></li>
-            </ul>
-        </div>
-
-        <!-- Leaves & Holidays -->
-        <div class="menu-section">
-            <h3 onclick="toggleMenu(this)"><i class="fas fa-calendar-alt"></i> Leaves & Holidays <span
-                    class="arrow">▶</span></h3>
-            <ul class="submenu">
-                <li><a href="#"><i class="fas fa-calendar-plus"></i> Leave Create</a></li>
-                <li><a href="#"><i class="fas fa-glass-cheers"></i> Holiday Create</a></li>
-            </ul>
-        </div>
-
-        <!-- Manage Shift -->
-        <div class="menu-section">
-            <h3 onclick="toggleMenu(this)"><i class="fas fa-clock"></i> Manage Shift <span class="arrow">▶</span></h3>
-            <ul class="submenu">
-                <li><a href="#"><i class="fas fa-calendar-day"></i> Shift Roster</a></li>
-            </ul>
-        </div>
-
-        <!-- Payroll -->
-        <div class="menu-section">
-            <h3 onclick="toggleMenu(this)"><i class="fas fa-money-check"></i> Payroll <span class="arrow">▶</span></h3>
-            <ul class="submenu">
-                <li><a href="bulk.html"><i class="fas fa-clipboard-list"></i> Bulk Attendance</a></li>
-                <li><a href="monthly.html"><i class="fas fa-calendar-check"></i> Monthly Payroll</a></li>
-                <li><a href="hourly.html"><i class="fas fa-clock"></i> Hourly Payroll</a></li>
-                <li><a href="payroll_final.html"><i class="fas fa-file-invoice-dollar"></i> Finalized Payroll</a></li>
-            </ul>
-        </div>
-    </div>
-                             
     <!-- Main content -->
     <div class="main-content34">
-        <div id="notification" style="
+        <div id="notification"
+            style="
     position: fixed;
     top: 20px;
     right: 20px;
@@ -179,7 +99,8 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     display: none;
     z-index: 9999;
-"></div>
+">
+        </div>
 
         <div class="top-bar34">
             <div>HR Management System</div>
@@ -220,12 +141,11 @@
 
                 <div class="card34">
                     <h3>Verification Request</h3>
-                    <form action="{{ route('dataVerification.store') }}" method="POST"
-                        enctype="multipart/form-data">
+                    <form action="{{ route('dataVerification.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="candidate_name" id="candidate_name">
                         <input type="hidden" name="candidate_department" id="candidate_department">
-                        <input type="hidden" name="candidate_id" id="candidate_id"> 
+                        <input type="hidden" name="candidate_id" id="candidate_id">
 
 
                         <div class="request-grid34">
@@ -272,49 +192,54 @@
                 </div>
 
                 <div class="card34">
-    <h3>Verification History</h3>
+                    <h3>Verification History</h3>
 
-    @forelse ($dataVerification as $item)
-        @php
-            $statusClass = match($item->status) {
-                'verified' => 'verified34',
-                'rejected' => 'rejected34',
-                default => 'pending34'
-            };
-        @endphp
+                    @forelse ($dataVerification as $item)
+                        @php
+                            $statusClass = match ($item->status) {
+                                'verified' => 'verified34',
+                                'rejected' => 'rejected34',
+                                default => 'pending34',
+                            };
+                        @endphp
 
-        <div class="list-item34">
-            <span>{{ $item->candidate_name ?? 'N/A' }}</span>
-            <span class="{{ $statusClass }}">{{ ucfirst($item->status) }}</span>
-        </div>
-    @empty
-        <p>No verification records yet.</p>
-    @endforelse
-</div>
+                        <div class="list-item34">
+                            <span>{{ $item->candidate_name ?? 'N/A' }}</span>
+                            <span class="{{ $statusClass }}">{{ ucfirst($item->status) }}</span>
+                        </div>
+                    @empty
+                        <p>No verification records yet.</p>
+                    @endforelse
+                </div>
 
             </div>
         </div>
     </div>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        function toggleMenu34(element) {
-            const submenu = element.nextElementSibling;
-            if (submenu) submenu.classList.toggle('open');
-            element.classList.toggle('active');
+        function toggleMenu(header) {
+            const isOpen = submenu.classList.contains("open");
+            document.querySelectorAll('.submenu').forEach(menu => menu.classList.remove('open'));
+            document.querySelectorAll('.menu-section h3').forEach(menuHeader => menuHeader.classList.remove('active'));
+            if(!isOpen){ submenu.classList.add("open"); header.classList.add("active"); }
+            const submenu = header.nextElementSibling;
         }
-
-        function toggleDropdown34(element) {
-            const container = element.nextElementSibling;
-            if (container) container.classList.toggle('open');
-            element.classList.toggle('active');
+        
+        function toggleDropdown(trigger) {
+            const isOpen = container.classList.contains("open");
+            trigger.parentElement.parentElement.querySelectorAll(".dropdown-container").forEach(drop => drop.classList.remove("open"));
+            trigger.parentElement.parentElement.querySelectorAll(".dropdown-btn").forEach(btn => btn.classList.remove("active"));
+            if(!isOpen){ container.classList.add("open"); trigger.classList.add("active"); }
+            const container = trigger.nextElementSibling;
         }
+    
 
         function updateFileName34(input, btnId) {
             if (input.files.length > 0) {
                 document.getElementById(btnId).textContent = "✅ " + input.files[0].name;
             }
         }
-        
+
         $(document).ready(function() {
             // 🔍 Search as user types
             $('#searchInput').on('keyup', function() {
@@ -367,10 +292,10 @@
                 let dept = $(this).data('job');
                 let id = $(this).data('id');
 
-                    // ✅ Fill hidden fields for form submission
-                    $('#candidate_name').val(name);
-                    $('#candidate_department').val(dept);
-                    $('#candidate_id').val(id);
+                // ✅ Fill hidden fields for form submission
+                $('#candidate_name').val(name);
+                $('#candidate_department').val(dept);
+                $('#candidate_id').val(id);
 
                 // Update candidate profile section dynamically
                 $('.profile-info34').html(`
@@ -379,39 +304,39 @@
     <p><b>Department:</b> ${dept}</p>
     <p><b>Joining Date:</b> N/A</p>
 `);
-$('.profile-status34').text('Loading...');
+                $('.profile-status34').text('Loading...');
 
-    // ✅ Fill hidden field properly
-    $('#candidate_name').val(name);
-    $('#candidate_department').val(dept);
-    $('#candidate_id').val(id);
+                // ✅ Fill hidden field properly
+                $('#candidate_name').val(name);
+                $('#candidate_department').val(dept);
+                $('#candidate_id').val(id);
 
 
-// Fetch verification info for selected candidate
-$.ajax({
-    url: `/get-candidate-verification/${id}`,
-    type: 'GET',
-    success: function(data) {
-        $('.profile-status34').text(data.status);
+                // Fetch verification info for selected candidate
+                $.ajax({
+                    url: `/get-candidate-verification/${id}`,
+                    type: 'GET',
+                    success: function(data) {
+                        $('.profile-status34').text(data.status);
 
-        // Fill HR response section
-        $('.card34:contains("HR Response")').html(`
+                        // Fill HR response section
+                        $('.card34:contains("HR Response")').html(`
             <h3>HR Response</h3>
             <p><b>HR Name:</b> ${data.hr_contact_name ?? 'N/A'}</p>
             <p><b>Email:</b> ${data.hr_contact_email ?? 'N/A'}</p>
             <p><b>Verification Result:</b> <span class="${data.status === 'verified' ? 'verified34' : 'pending34'}">${data.status}</span></p>
         `);
-    },
-    error: function() {
-        $('.profile-status34').text('Pending');
-        $('.card34:contains("HR Response")').html(`
+                    },
+                    error: function() {
+                        $('.profile-status34').text('Pending');
+                        $('.card34:contains("HR Response")').html(`
             <h3>HR Response</h3>
             <p><b>HR Name:</b> N/A</p>
             <p><b>Email:</b> N/A</p>
             <p><b>Verification Result:</b> <span class="pending34">Awaiting Response</span></p>
         `);
-    }
-});
+                    }
+                });
                 // Clear search results
                 $('#searchResults').html('');
 
@@ -422,26 +347,26 @@ $.ajax({
             });
 
         });
-         
-    const notification = document.getElementById('notification');
 
-    @if(session('success'))
-        notification.textContent = '{{ session('success') }}';
-        notification.style.backgroundColor = '#28a745'; // green
-        notification.style.display = 'block';
-        setTimeout(() => {
-            notification.style.display = 'none';
-        }, 3000); // hide after 3 sec
-    @endif
+        const notification = document.getElementById('notification');
 
-    @if(session('error'))
-        notification.textContent = '{{ session('error') }}';
-        notification.style.backgroundColor = '#dc3545'; // red
-        notification.style.display = 'block';
-        setTimeout(() => {
-            notification.style.display = 'none';
-        }, 4000); // hide after 4 sec
-    @endif
+        @if (session('success'))
+            notification.textContent = '{{ session('success') }}';
+            notification.style.backgroundColor = '#28a745'; // green
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000); // hide after 3 sec
+        @endif
+
+        @if (session('error'))
+            notification.textContent = '{{ session('error') }}';
+            notification.style.backgroundColor = '#dc3545'; // red
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 4000); // hide after 4 sec
+        @endif
     </script>
 
 </body>

@@ -20,22 +20,25 @@ class FinalSelectionController extends Controller
         return view('hrms::candidatesRegistration.finalSelection', compact('finalSelection'));
     }
 
-        
-    public function sendEmail($id)
-    {
-        $candidate = Candidates::findOrFail($id);
+public function sendEmail($id)
+{
+    $candidate = \Modules\HRMS\Models\Candidates::findOrFail($id);
 
-        // Only send email if selected
-        if($candidate->final_selection != 'Selected') {
-            return back()->with('error', 'Candidate not selected!');
-        }
+    if (strtolower($candidate->final_selection) != 'selected') {
+        return response()->json(['status' => 'error', 'message' => 'Candidate not selected!']);
+    }
 
-        // Send email using Laravel Mail
-        Mail::send('hrms::emails.prejoining', ['candidate' => $candidate], function($message) use ($candidate) {
+    try {
+        \Mail::send('hrms::emails.prejoining', ['candidate' => $candidate], function ($message) use ($candidate) {
             $message->to($candidate->email, $candidate->full_name)
                     ->subject('Pre-Joining Form');
         });
 
-        return back()->with('success', 'Email sent successfully to '.$candidate->full_name);
+        $candidate->update(['email_sent' => true]);
+
+        return response()->json(['status' => 'success', 'message' => 'Email sent successfully to ' . $candidate->full_name]);
+    } catch (\Exception $e) {
+        return response()->json(['status' => 'error', 'message' => 'Failed to send email: ' . $e->getMessage()]);
     }
+}
 }

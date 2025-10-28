@@ -11,7 +11,7 @@ class FresherEmployee extends Model
     use HasFactory;
 
     // Table name
-    protected $table = 'fresher_employees';
+    protected $table = 'freshers_employees';
 
     // Fillable columns
     protected $fillable = [

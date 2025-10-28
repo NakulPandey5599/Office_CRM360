@@ -1,18 +1,22 @@
 <?php
 
 
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Modules\HRMS\app\Models\Candidates;
+use Modules\HRMS\Http\Controllers\ReportController;
+use Modules\HRMS\Http\Controllers\DashboardController;
 use Modules\HRMS\Http\Controllers\InterviewController;
+use Modules\HRMS\Http\Controllers\OfferLetterController;
 use Modules\HRMS\Http\Controllers\RecruitmentController;
 use Modules\HRMS\Http\Controllers\NewCandidateController;
+use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
+use Modules\HRMS\Http\Controllers\JoiningLetterController;
 use Modules\HRMS\Http\Controllers\CandidatesListController;
 use Modules\HRMS\Http\Controllers\FinalSelectionController;
 use Modules\HRMS\Http\Controllers\DataVerificationController;
 use Modules\HRMS\Http\Controllers\PreJoiningProcessController;
-use Illuminate\Support\Facades\Mail;
-use Modules\HRMS\Http\Controllers\JoiningLetterController;
-use Modules\HRMS\Http\Controllers\OfferLetterController;
+use Modules\HRMS\Http\Controllers\TrainingAssessmentController;
 
 Route::middleware(['auth', 'verified'])->group(function () {
     // Recruitment Routes
@@ -48,7 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
   // Send Email Route
-  Route::post('/candidate/send-email/{id}', [FinalSelectionController::class, 'sendEmail'])->name('candidate.sendEmail');
+  Route::post('/hrms/send-email/{id}', [FinalSelectionController::class, 'sendEmail'])->name('candidate.sendEmail');
 
   //offer letter route
   Route::get('hrms/offer-letter', [OfferLetterController::class, 'index'])->name('offerLetter.index');
@@ -64,3 +68,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
   Route::get('/hrms/joining-letter/search', [JoiningLetterController::class, 'search'])->name('joining-letter.search');
   Route::post('/hrms/joining-letter/send-email', [JoiningLetterController::class, 'sendEmail'])->name('joining-letter.sendEmail');
   Route::post('/hrms/joining-letter/download', [JoiningLetterController::class, 'downloadPDF'])->name('hrms.joining.download');
+
+  Route::get('/hrms/training-assessment', [TrainingAssessmentController::class, 'index'])->name('trainingAssessment.index');
+  Route::get('/hrms/training-assessment/mcq', [TrainingAssessmentController::class, 'mcq'])->name('trainingAssessment.mcq');
+  Route::post('/training/submit', [TrainingAssessmentController::class, 'storeAnswers'])->name('training.submit');
+
+
+  Route::get('/hrms/report', [ReportController::class, 'index'])->name('report.index');
+  Route::get('/hrms/dashboard',[DashboardController::class, 'index'])->name('dashboard.index');
+  
