@@ -22,14 +22,14 @@ class FinalSelectionController extends Controller
 
 public function sendEmail($id)
 {
-    $candidate = \Modules\HRMS\Models\Candidates::findOrFail($id);
+    $candidate = Candidates::findOrFail($id);
 
     if (strtolower($candidate->final_selection) != 'selected') {
         return response()->json(['status' => 'error', 'message' => 'Candidate not selected!']);
     }
 
     try {
-        \Mail::send('hrms::emails.prejoining', ['candidate' => $candidate], function ($message) use ($candidate) {
+        Mail::send('hrms::emails.prejoining', ['candidate' => $candidate], function ($message) use ($candidate) {
             $message->to($candidate->email, $candidate->full_name)
                     ->subject('Pre-Joining Form');
         });

@@ -3,6 +3,7 @@
 namespace Modules\HRMS\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Modules\HRMS\Models\McqAnswer;
 use Modules\HRMS\Models\Candidates;
 use App\Http\Controllers\Controller;
 use Modules\HRMS\Models\OfferLetter;
@@ -11,75 +12,57 @@ use Modules\HRMS\Models\ExperiencedEmployee;
 
 class DashboardController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-public function index()
-{
-    $registeredCandidates = Candidates::count(); // total registered
-    $freshers = FresherEmployee::count();
-    $experienced = ExperiencedEmployee::count();
-    $pendingPreJoining = $freshers + $experienced;
-    $offerLettersSent = OfferLetter::count();
-    $latestCandidates = Candidates::latest()->take(5)->get();
-    $latestOffers = OfferLetter::latest()->take(5)->get(['candidate_name']);
-    
-    $trainingLabels = ['Q1','Q2','Q3','Q4'];
-    $trainingData = [10, 20, 30, 25]; // Replace with real data
-    $onboardingData = [5, 15, 10]; 
 
-    // $activeTrainingModules = TrainingModule::where('status', 'active')->count();
-
-    return view('hrms::dashboard.index', compact(
-        'registeredCandidates',
-        'pendingPreJoining',
-        'offerLettersSent',
-        'latestCandidates',
-        'latestOffers',
-        'trainingLabels',
-        'trainingData',
-        'onboardingData',
-        // 'activeTrainingModules'
-    ));
-}
-
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function index()
     {
-        return view('hrms::create');
+        $registeredCandidates = Candidates::count();
+        $freshers = FresherEmployee::count();
+        $experienced = ExperiencedEmployee::count();
+        $pendingPreJoining = $freshers + $experienced;
+        $offerLettersSent = OfferLetter::count();
+        $latestCandidates = Candidates::latest()->take(5)->get();
+        $latestOffers = OfferLetter::latest()->take(5)->get(['candidate_name']);
+
+        $questionCounts = [];
+
+        // ✅ Fetch only 'answers' column
+        $allAnswers = McqAnswer::all(['answers']);
+
+        foreach ($allAnswers as $record) {
+            $decoded = $record->answers; // already array (due to casts in model)
+
+            // 🛡️ Skip if it's null or not an array
+            if (!is_array($decoded)) {
+                continue;
+            }
+
+            foreach ($decoded as $questionId => $response) {
+                if (!isset($questionCounts[$questionId])) {
+                    $questionCounts[$questionId] = 0;
+                }
+                $questionCounts[$questionId]++;
+            }
+        }
+
+        // ✅ Always ensure exactly 5 questions (Q1–Q5)
+        $trainingLabels = ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'];
+        $trainingData = [];
+
+        for ($i = 1; $i <= 5; $i++) {
+            $trainingData[] = $questionCounts[$i] ?? 0;
+        }
+
+        $onboardingData = [5, 15, 10]; // demo static values
+
+        return view('hrms::dashboard.index', compact(
+            'registeredCandidates',
+            'pendingPreJoining',
+            'offerLettersSent',
+            'latestCandidates',
+            'latestOffers',
+            'trainingLabels',
+            'trainingData',
+            'onboardingData'
+        ));
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request) {}
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('hrms::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('hrms::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id) {}
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id) {}
 }

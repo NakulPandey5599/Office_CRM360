@@ -5,8 +5,10 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Modules\HRMS\app\Models\Candidates;
 use Modules\HRMS\Http\Controllers\ReportController;
+use Modules\HRMS\Http\Controllers\PayrollController;
 use Modules\HRMS\Http\Controllers\DashboardController;
 use Modules\HRMS\Http\Controllers\InterviewController;
+use Modules\HRMS\Http\Controllers\AttendanceController;
 use Modules\HRMS\Http\Controllers\OfferLetterController;
 use Modules\HRMS\Http\Controllers\RecruitmentController;
 use Modules\HRMS\Http\Controllers\NewCandidateController;
@@ -77,3 +79,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
   Route::get('/hrms/report', [ReportController::class, 'index'])->name('report.index');
   Route::get('/hrms/dashboard',[DashboardController::class, 'index'])->name('dashboard.index');
   
+  //Payroll Routes
+  Route::get('/hrms/payroll/monthly-payroll', [PayrollController::class, 'monthlyPayroll'])->name('monthlyPayroll.index');
+  Route::get('/hrms/payroll/hourly-payroll', [PayrollController::class, 'hourlyPayroll'])->name('hourlyPayroll.index');
+  Route::get('/hrms/payroll/finalized-payroll', [PayrollController::class, 'finalizedPayroll'])->name('finalizedPayroll.index');
+
+
+  Route::get('/hrms/payroll/bulk-attendence', [AttendanceController::class, 'bulkAttendence'])->name('bulkAttendence.index');
+Route::get('/bulk-attendance/filter', [AttendanceController::class, 'filter'])->name('bulk.attendance.filter');
+Route::post('/bulk-attendance/save', [AttendanceController::class, 'save'])->name('bulk.attendance.save');
+Route::post('/attendance/mark', [AttendanceController::class, 'storeAttendance'])->name('attendance.mark.store');
+Route::get('/attendance/search', [AttendanceController::class, 'searchEmployee'])->name('attendance.search');
+
+

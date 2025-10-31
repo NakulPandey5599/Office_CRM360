@@ -20,9 +20,15 @@ class OfferLetterController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        return view('hrms::offerLetter.index');
-    }
+{
+    // Fetch the latest status from data_verification table
+    $status = DB::table('data_verification')->value('status') ?? 'pending';
+
+    // Optionally, you can fetch by candidate if needed:
+    // $status = DB::table('data_verification')->where('candidate_id', $candidateId)->value('status') ?? 'pending';
+
+    return view('hrms::offerLetter.index', compact('status'));
+}
 
 
     /**
