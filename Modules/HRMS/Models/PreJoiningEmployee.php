@@ -4,17 +4,16 @@ namespace Modules\HRMS\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Modules\HRMS\Database\Factories\FresherEmployeeFactory;
+// use Modules\HRMS\Database\Factories\PreJoiningEmployeeFactory;
 
-class FresherEmployee extends Model
+class PreJoiningEmployee extends Model
 {
     use HasFactory;
 
-    // Table name
-    protected $table = 'freshers_employees';
+    protected $table = 'prejoining_employees';
 
-    // Fillable columns
     protected $fillable = [
+        'experience_type',
         'first_name',
         'last_name',
         'email',
@@ -46,9 +45,16 @@ class FresherEmployee extends Model
         'mother_name',
         'emergency_contact_name',
         'emergency_contact_number',
+        'company_name',
+        'designation',
+        'duration',
+        'reason_for_leaving',
+        'experience_certificate',
+        'salary_slip',
+        'relieving_letter',
     ];
 
-    // Cast JSON columns to array automatically
+    // Cast JSON fields automatically to array
     protected $casts = [
         'highest_qualification' => 'array',
         'highest_university' => 'array',
@@ -56,5 +62,14 @@ class FresherEmployee extends Model
         'highest_specialization' => 'array',
         'university_percentage' => 'array',
         'university_document' => 'array',
+        'company_name' => 'array',
+        'designation' => 'array',
+        'duration' => 'array',
+        'reason_for_leaving' => 'array',
+        'experience_certificate' => 'array',
+        'salary_slip' => 'array',
+        'relieving_letter' => 'array',
     ];
+
+   
 }

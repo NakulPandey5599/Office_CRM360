@@ -27,4 +27,16 @@ class CandidatesListController extends Controller
 
         return redirect()->route('candidate.index')->with('success', 'Candidate deleted successfully.');
     }
+
+    public function update(Request $request, $id)
+{
+    $candidate = Candidates::findOrFail($id);
+    $candidate->update([
+        'status' => $request->status,
+        'final_selection' => $request->final_selection,
+    ]);
+
+    return response()->json(['success' => true]);
+}
+
 }

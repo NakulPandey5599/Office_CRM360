@@ -7,12 +7,44 @@
     <title>Pre-Joining Form</title>
     {{-- <link rel="stylesheet" href="{{ asset('Modules/HRMS/css/app.css') }}" /> --}}
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-
+<style>.alert {
+    padding: 12px 20px;
+    margin: 15px 0;
+    border-radius: 8px;
+    font-weight: 500;
+}
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 5px solid #28a745;
+}
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 5px solid #dc3545;
+}
+</style>
 </head>
 
 <body>
 
     <div class="prejoin-container">
+        @if (session('success'))
+    <div class="alert alert-success" id="success-message">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if ($errors->any())
+    <div class="alert alert-danger" id="error-message">
+        <ul id="error-list">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
         <h2>Pre-Joining Form</h2>
         <div class="prejoin-progress-container">
             <ul class="prejoin-progressbar" id="prejoin-progressbar">
@@ -257,103 +289,78 @@
             </div>
         </form>
     </div>
+<script>
 
-   <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const successMsg = document.getElementById('success-message');
+    if (successMsg) {
+        successMsg.style.transition = 'opacity 0.8s ease';
+        setTimeout(() => {
+            successMsg.style.opacity = '0';
+            setTimeout(() => successMsg.remove(), 800);
+        }, 4000); // Hide after 4 seconds
+    }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
 
-    // === Multi-step form ===
+    // === Multi-step form core ===
     let currentStep = 0;
     const steps = document.querySelectorAll(".prejoin-form-step");
     const progressbarItems = document.querySelectorAll(".prejoin-progressbar li");
     const form = document.getElementById("prejoin-multiStepForm");
     const saveBtn = document.getElementById("saveContinueBtn");
 
-    function showStep(step){
-        steps.forEach((el,i)=>el.classList.toggle("active", i===step));
-        progressbarItems.forEach((el,i)=>el.classList.toggle("active", i<=step));
-        saveBtn.textContent = (step === steps.length-1) ? "Submit" : "Save & Continue";
+    // ✅ Show current step initially
+    showStep(currentStep);
+
+    // ✅ Handle Save/Submit button
+    saveBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+
+        if (saveBtn.textContent.trim() === "Submit") {
+            console.log("✅ Submitting form...");
+            form.submit();
+        } else {
+            nextStep();
+        }
+    });
+
+    // ✅ Show specific step
+    function showStep(stepIndex) {
+        steps.forEach((el, i) => el.classList.toggle("active", i === stepIndex));
+        progressbarItems.forEach((el, i) => el.classList.toggle("active", i <= stepIndex));
+        saveBtn.textContent = (stepIndex === steps.length - 1) ? "Submit" : "Save & Continue";
     }
 
-    window.nextStep = ()=>{ if(currentStep<steps.length-1){currentStep++; showStep(currentStep);} else { form.submit(); } }
-    window.prevStep = ()=>{ if(currentStep>0){currentStep--; showStep(currentStep);} }
-
-    // === Upload button init ===
-    function initUploadButtons(container = document){
-        container.querySelectorAll('.prejoin-file').forEach(wrapper=>{
-            const input = wrapper.querySelector('input[type="file"]');
-            const button = wrapper.querySelector('button');
-            const fileNameSpan = wrapper.querySelector('.file-name');
-            if(!input || !button) return;
-            
-            const newBtn = button.cloneNode(true);
-            button.replaceWith(newBtn);
-
-            newBtn.addEventListener('click', e=>{ e.preventDefault(); input.click(); });
-            input.addEventListener('change', ()=>{
-                fileNameSpan.textContent = input.files.length>0
-                    ? Array.from(input.files).map(f=>f.name).join(', ')
-                    : '';
-            });
-        });
-    }
-
-    // === Dynamic Delete Button ===
-    function attachDeleteButton(block){
-        if(block.dataset.initial==="true") return;
-        if(!block.querySelector('.prejoin-delete-btn')){
-            const del = document.createElement('button');
-            del.type='button';
-            del.className='prejoin-delete-btn';
-            del.textContent='Delete';
-            del.addEventListener('click', ()=>{ block.remove(); updateEmploymentTable(); });
-            block.appendChild(del);
+    // ✅ Go to next step (without resetting)
+    function nextStep() {
+        if (currentStep < steps.length - 1) {
+            currentStep++;
+            showStep(currentStep);
         }
     }
 
-    // === Highest Qualification + ===
-    window.addQualification = ()=>{
-        const section = document.getElementById("prejoin-qualification-section");
-        const template = section.querySelector(".prejoin-qualification-block[data-initial='true']");
-        const clone = template.cloneNode(true);
-        clone.dataset.initial="false";
-        clone.querySelectorAll('input').forEach(i=>i.value='');
-        attachDeleteButton(clone);
-        section.appendChild(clone);
-        initUploadButtons(clone);
-    }
+    // ✅ Go to previous step
+    window.prevStep = () => {
+        if (currentStep > 0) {
+            currentStep--;
+            showStep(currentStep);
+        }
+    };
 
-    // === Employment Table + + ===
-    const section = document.getElementById("prejoin-employment-section");
-    const tableBody = document.getElementById("employment-table-body");
+    // === Upload button handling ===
+    function initUploadButtons(container = document) {
+        container.querySelectorAll('.prejoin-file').forEach(wrapper => {
+            const input = wrapper.querySelector('input[type="file"]');
+            const button = wrapper.querySelector('button');
+            const fileNameSpan = wrapper.querySelector('.file-name');
+            if (!input || !button) return;
 
-    function updateEmploymentTable(){
-    tableBody.innerHTML='';
-    section.querySelectorAll('.prejoin-employment-block').forEach(block=>{
-        const company = block.querySelector('input[name^="company_name"]').value;
-        const designation = block.querySelector('input[name^="designation"]').value;
-        const duration = block.querySelector('input[name^="duration"]').value;
+            const newBtn = button.cloneNode(true);
+            button.replaceWith(newBtn);
 
-        if(company||designation||duration){
-            const row = document.createElement('tr');
-            row.innerHTML=`
-                <td>${company}</td>
-                <td>${designation}</td>
-                <td>${duration}</td>
-                <td>
-                  <div class="prejoin-file">
-                    <input type="file" class="receiving-letter-file" hidden />
-                    <button type="button" class="prejoin-browse-btn">Upload</button>
-                    <span class="file-name"></span>
-                  </div>
-                </td>
-            `;
-            tableBody.appendChild(row);
-
-            const input = row.querySelector('.receiving-letter-file');
-            const button = row.querySelector('.prejoin-browse-btn');
-            const fileNameSpan = row.querySelector('.file-name');
-
-            button.addEventListener('click', e => {
+            newBtn.addEventListener('click', e => {
                 e.preventDefault();
                 input.click();
             });
@@ -363,38 +370,109 @@ document.addEventListener('DOMContentLoaded', () => {
                     ? Array.from(input.files).map(f => f.name).join(', ')
                     : '';
             });
-        }
-    });
-}
+        });
+    }
 
-    function attachEmploymentListeners(block){
-        block.querySelectorAll('input[type="text"]').forEach(input=>{
+    // === Delete button for dynamic blocks ===
+    function attachDeleteButton(block) {
+        if (block.dataset.initial === "true") return;
+        if (!block.querySelector('.prejoin-delete-btn')) {
+            const del = document.createElement('button');
+            del.type = 'button';
+            del.className = 'prejoin-delete-btn';
+            del.textContent = 'Delete';
+            del.addEventListener('click', () => {
+                block.remove();
+                updateEmploymentTable();
+            });
+            block.appendChild(del);
+        }
+    }
+
+    // === Qualification (+ Add) ===
+    window.addQualification = () => {
+        const section = document.getElementById("prejoin-qualification-section");
+        const template = section.querySelector(".prejoin-qualification-block[data-initial='true']");
+        const clone = template.cloneNode(true);
+        clone.dataset.initial = "false";
+        clone.querySelectorAll('input').forEach(i => i.value = '');
+        attachDeleteButton(clone);
+        section.appendChild(clone);
+        initUploadButtons(clone);
+    };
+
+    // === Employment Table ===
+    const section = document.getElementById("prejoin-employment-section");
+    const tableBody = document.getElementById("employment-table-body");
+
+    function updateEmploymentTable() {
+        tableBody.innerHTML = '';
+        section.querySelectorAll('.prejoin-employment-block').forEach(block => {
+            const company = block.querySelector('input[name^="company_name"]').value;
+            const designation = block.querySelector('input[name^="designation"]').value;
+            const duration = block.querySelector('input[name^="duration"]').value;
+
+            if (company || designation || duration) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${company}</td>
+                    <td>${designation}</td>
+                    <td>${duration}</td>
+                    <td>
+                        <div class="prejoin-file">
+                            <input type="file" class="receiving-letter-file" hidden />
+                            <button type="button" class="prejoin-browse-btn">Upload</button>
+                            <span class="file-name"></span>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+
+                const input = row.querySelector('.receiving-letter-file');
+                const button = row.querySelector('.prejoin-browse-btn');
+                const fileNameSpan = row.querySelector('.file-name');
+
+                button.addEventListener('click', e => {
+                    e.preventDefault();
+                    input.click();
+                });
+
+                input.addEventListener('change', () => {
+                    fileNameSpan.textContent = input.files.length > 0
+                        ? Array.from(input.files).map(f => f.name).join(', ')
+                        : '';
+                });
+            }
+        });
+    }
+
+    function attachEmploymentListeners(block) {
+        block.querySelectorAll('input[type="text"]').forEach(input => {
             input.addEventListener('input', updateEmploymentTable);
         });
     }
 
-    // Initial blocks
-    section.querySelectorAll('.prejoin-employment-block').forEach(block=>{
+    // === Initialize employment blocks ===
+    section.querySelectorAll('.prejoin-employment-block').forEach(block => {
         attachDeleteButton(block);
         attachEmploymentListeners(block);
     });
 
-    // Add new employment block
-    window.addEmployment = ()=>{
+    // === Add new employment block ===
+    window.addEmployment = () => {
         const template = section.querySelector('.prejoin-employment-block[data-initial="true"]');
         const clone = template.cloneNode(true);
-        clone.dataset.initial="false";
-        clone.querySelectorAll('input').forEach(i=>i.value='');
+        clone.dataset.initial = "false";
+        clone.querySelectorAll('input').forEach(i => i.value = '');
         attachDeleteButton(clone);
         attachEmploymentListeners(clone);
         section.appendChild(clone);
         initUploadButtons(clone);
         updateEmploymentTable();
-    }
+    };
 
-    // Init page
+    // === Initialize ===
     initUploadButtons();
-    showStep(currentStep);
     updateEmploymentTable();
 });
 </script>

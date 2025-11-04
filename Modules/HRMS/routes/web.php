@@ -30,6 +30,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     //candidate List Routes
     Route::get('hrms/candidate-list', [CandidatesListController::class, 'index'])->name('candidate.index');
     Route::delete('hrms/candidate/{id}', [CandidatesListController::class, 'destroy'])->name('candidate.destroy');
+    Route::put('hrms/candidate/update/{id}', [CandidatesListController::class, 'update'])->name('candidate.update');
+
     //Interview Routes
     Route::get('hrms/interview', [InterviewController::class, 'index'])->name('interviews.index');
     //Final Selection Routes
@@ -72,6 +74,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
   Route::post('/hrms/joining-letter/download', [JoiningLetterController::class, 'downloadPDF'])->name('hrms.joining.download');
 
   Route::get('/hrms/training-assessment', [TrainingAssessmentController::class, 'index'])->name('trainingAssessment.index');
+  Route::post('hrms/training/add-module', [TrainingAssessmentController::class, 'store'])->name('training.addModule');
+
   Route::get('/hrms/training-assessment/mcq', [TrainingAssessmentController::class, 'mcq'])->name('trainingAssessment.mcq');
   Route::post('/training/submit', [TrainingAssessmentController::class, 'storeAnswers'])->name('training.submit');
 

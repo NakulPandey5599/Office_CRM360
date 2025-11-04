@@ -4,14 +4,13 @@ namespace Modules\HRMS\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
-use PhpParser\Node\Stmt\TryCatch;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Auth\Events\Validated;
 use Modules\HRMS\Models\JoiningLetter;
 use Modules\HRMS\Mail\JoiningLetterMail;
+use Modules\HRMS\Models\DataVerification;
 
 class JoiningLetterController extends Controller
 {
@@ -21,14 +20,6 @@ class JoiningLetterController extends Controller
     public function index()
     {
         return view('hrms::joiningLetter.index');
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('hrms::create');
     }
 
     /**
@@ -51,14 +42,15 @@ class JoiningLetterController extends Controller
         ]);
     }
 
-
-    
+    /**
+     * Search candidate (for joining letter)
+     */
     public function search(Request $request)
     {
         $query = $request->input('query');
 
-        // 🔹 Search in experienced_employees
-        $experienced = DB::table('experienced_employees')
+        // 🔹 Unified search in prejoining_employees
+        $results = DB::table('prejoining_employees')
             ->where('first_name', 'like', "%{$query}%")
             ->orWhere('last_name', 'like', "%{$query}%")
             ->orWhere('job_profile', 'like', "%{$query}%")
@@ -66,31 +58,26 @@ class JoiningLetterController extends Controller
             ->limit(10)
             ->get();
 
-        // 🔹 Search in freshers_employees
-        $freshers = DB::table('freshers_employees')
-            ->where('first_name', 'like', "%{$query}%")
-            ->orWhere('last_name', 'like', "%{$query}%")
-            ->orWhere('job_profile', 'like', "%{$query}%")
-            ->select('id', 'first_name', 'last_name', 'job_profile', 'email')
-            ->limit(10)
-            ->get();
-
-        // 🔹 Merge both results
-        $results = $experienced->merge($freshers);
+        // 🔹 Attach verification status
+        foreach ($results as $emp) {
+            $emp->status = DataVerification::where('candidate_id', $emp->id)->value('status') ?? '⏳ Pending';
+        }
 
         return response()->json($results);
     }
 
-
+    /**
+     * Send Joining Letter Email
+     */
     public function sendEmail(Request $request)
     {
         $request->validate([
             'candidate_email' => 'required|email',
-            'candidate_name' => 'required|string',
-            'designation' => 'required|string',
-            'department' => 'required|string',
-            'joining_date' => 'required|date',
-            'location' => 'required|string',
+            'candidate_name'  => 'required|string',
+            'designation'     => 'required|string',
+            'department'      => 'required|string',
+            'joining_date'    => 'required|date',
+            'location'        => 'required|string',
         ]);
 
         $details = $request->all();
@@ -103,37 +90,35 @@ class JoiningLetterController extends Controller
         }
     }
 
-   
+    /**
+     * Download Joining Letter as PDF
+     */
+    public function downloadPDF(Request $request)
+    {
+        try {
+            $data = $request->all();
 
+            // Log data for debugging
+            Log::info('PDF Data:', $data);
 
-public function downloadPDF(Request $request)
-{
-    try {
-        $data = $request->all();
+            $pdf = Pdf::loadView('hrms::joiningLetter.joining_letter_pdf', [
+                'name'         => $data['candidate_name'] ?? 'Unknown',
+                'designation'  => $data['designation'] ?? 'N/A',
+                'department'   => $data['department'] ?? 'N/A',
+                'joining_date' => $data['joining_date'] ?? 'N/A',
+                'location'     => $data['location'] ?? 'N/A',
+            ]);
 
-        // Log data for debugging
-        Log::info('PDF Data:', $data);
+            return response($pdf->output(), 200)
+                ->header('Content-Type', 'application/pdf')
+                ->header('Content-Disposition', 'attachment; filename="' . ($data['candidate_name'] ?? 'Employee') . '_Joining_Letter.pdf"');
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('hrms::joiningLetter.joining_letter_pdf', [
-            'name' => $data['candidate_name'] ?? 'Unknown',
-            'designation' => $data['designation'] ?? 'N/A',
-            'department' => $data['department'] ?? 'N/A',
-            'joining_date' => $data['joining_date'] ?? 'N/A',
-            'location' => $data['location'] ?? 'N/A',
-        ]);
-
-        return response($pdf->output(), 200)
-            ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'attachment; filename="' . ($data['candidate_name'] ?? 'Employee') . '_Joining_Letter.pdf"');
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'error' => 'PDF generation failed',
-            'message' => $e->getMessage(),
-        ], 500);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error'   => 'PDF generation failed',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
 }
 
-
-
-}

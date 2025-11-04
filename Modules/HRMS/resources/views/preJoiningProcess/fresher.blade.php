@@ -371,6 +371,7 @@
             @csrf
             <!-- Step 1 -->
             <input type="hidden" name="experience_type" value="Fresher">
+            
 
             <div class="form-step active">
                 <h3>Personal Information</h3>

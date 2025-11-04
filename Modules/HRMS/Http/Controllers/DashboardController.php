@@ -7,31 +7,27 @@ use Modules\HRMS\Models\McqAnswer;
 use Modules\HRMS\Models\Candidates;
 use App\Http\Controllers\Controller;
 use Modules\HRMS\Models\OfferLetter;
-use Modules\HRMS\Models\FresherEmployee;
-use Modules\HRMS\Models\ExperiencedEmployee;
+use Modules\HRMS\Models\PrejoiningEmployee; // ✅ replaced Fresher + Experienced
 
 class DashboardController extends Controller
 {
-
     public function index()
     {
+        // 🧮 Core statistics
         $registeredCandidates = Candidates::count();
-        $freshers = FresherEmployee::count();
-        $experienced = ExperiencedEmployee::count();
-        $pendingPreJoining = $freshers + $experienced;
+        $pendingPreJoining = PrejoiningEmployee::count(); // ✅ merged both
         $offerLettersSent = OfferLetter::count();
+
         $latestCandidates = Candidates::latest()->take(5)->get();
         $latestOffers = OfferLetter::latest()->take(5)->get(['candidate_name']);
 
+        // 📊 Training progress data
         $questionCounts = [];
-
-        // ✅ Fetch only 'answers' column
-        $allAnswers = McqAnswer::all(['answers']);
+        $allAnswers = McqAnswer::all(['answers']); // only 'answers' column
 
         foreach ($allAnswers as $record) {
-            $decoded = $record->answers; // already array (due to casts in model)
+            $decoded = $record->answers; // already array via model casts
 
-            // 🛡️ Skip if it's null or not an array
             if (!is_array($decoded)) {
                 continue;
             }
@@ -52,7 +48,8 @@ class DashboardController extends Controller
             $trainingData[] = $questionCounts[$i] ?? 0;
         }
 
-        $onboardingData = [5, 15, 10]; // demo static values
+        // 🔧 Static onboarding demo data
+        $onboardingData = [5, 15, 10];
 
         return view('hrms::dashboard.index', compact(
             'registeredCandidates',

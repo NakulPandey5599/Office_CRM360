@@ -3,8 +3,11 @@
 namespace Modules\HRMS\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Modules\HRMS\Models\Candidates;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
+use Modules\HRMS\Mail\InterviewMail;
+
 
 
 class NewCandidateController extends Controller
@@ -64,6 +67,12 @@ class NewCandidateController extends Controller
 
             // ✅ Create candidate
             $candidate = Candidates::create($validated);
+
+             // Send mail only if interview mode = Online
+        if ($request->has('send_mail') && $request->interview_mode === 'Online') {
+            Mail::to($request->email)->send(new InterviewMail($candidate));
+            return redirect()->back()->with('success', 'Candidate saved and mail sent successfully!');
+        }
     
             return redirect()->back()->with('success', 'User added successfully!');
         } catch (\Throwable $th) {

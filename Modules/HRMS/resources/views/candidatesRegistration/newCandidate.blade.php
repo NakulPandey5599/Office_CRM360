@@ -418,7 +418,7 @@
                     <div class="actions">
                         <button type="submit" class="btn-secondary">Save</button>
                         <button type="submit" class="btn-secondary">Save & Add More</button>
-                        <button type="submit" id="send-mail" class="send-mail" style="display:none;">Send Mail</button>
+                        <button type="submit" name="send_mail" value="1" id="send-mail" class="send-mail" style="display:none;">Send Mail</button>
                     </div>
                 </form>
         </div>

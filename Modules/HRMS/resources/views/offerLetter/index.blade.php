@@ -207,8 +207,9 @@ function toggleDropdown(trigger) {
                                         data-name="${fullName}"
                                         data-job="${job}"
                                         data-type="${emp.type || 'experienced'}"
-                                        data-email="${emp.email || ''}">
-                                        <strong>${fullName}</strong> 
+                                        data-email="${emp.email || ''}"
+                                        data-status="${emp.status}">
+                                        <strong>${fullName}</strong>
                                         <small>(${job})</small>
                                     </div>
                                 `;
@@ -228,31 +229,43 @@ function toggleDropdown(trigger) {
             });
 
             // Select candidate
-            $(document).on('click', '.search-item', function() {
-                let id = $(this).data('id');
-                let name = $(this).data('name');
-                let job = $(this).data('job');
-                let type = $(this).data('type');
-                let email = $(this).data('email'); // <--- get email from search item
+           // Select candidate
+$(document).on('click', '.search-item', function() {
+    let id = $(this).data('id');
+    let name = $(this).data('name');
+    let job = $(this).data('job');
+    let type = $(this).data('type');
+    let email = $(this).data('email');
+    let status = $(this).data('status'); // ✅ new line
 
-                // Populate visible fields
-                $('#offerCandIdInput').val(id);
-                $('#offerNameInput').val(name);
-                $('#offerDesignationInput').val(job);
-                $('#offerDeptInput').val(type === 'fresher' ? 'Fresher Department' :
-                    'Experienced Department');
+    // Populate visible fields
+    $('#offerCandIdInput').val(id);
+    $('#offerNameInput').val(name);
+    $('#offerDesignationInput').val(job);
+    $('#offerDeptInput').val(type === 'fresher' ? 'Fresher Department' : 'Experienced Department');
 
-                // Populate hidden email field
-                $('#offerCandidateEmail').val(email); // <--- THIS IS ESSENTIAL
+    // Populate hidden email field
+    $('#offerCandidateEmail').val(email);
 
-                // Update profile box
-                $('#offerProfileName').text(name);
-                $('#offerProfileDesignation').text(`${id} • ${job}`);
-                $('#offerProfilePic').text(name.split(' ').map(n => n[0]).join('').toUpperCase());
+    // Update profile box
+    $('#offerProfileName').text(name);
+    $('#offerProfileDesignation').text(`${id} • ${job}`);
+    $('#offerProfilePic').text(name.split(' ').map(n => n[0]).join('').toUpperCase());
 
-                $('#searchResults').html('');
-                $('#searchInput').val('');
-            });
+    // ✅ Update status dynamically
+    $('#offerProfileStatus')
+        .text(status)
+        .css({
+            color:
+                status.toLowerCase().includes('approved') ? '#28a745' :
+                status.toLowerCase().includes('rejected') ? '#dc3545' :
+                '#ffc107' // yellow for pending
+        });
+
+    // Clear search
+    $('#searchResults').html('');
+    $('#searchInput').val('');
+});
 
             // Offer preview
             window.offerShowPreview = function() {
