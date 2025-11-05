@@ -26,6 +26,11 @@ class Candidates extends Model
         'final_selection',
         'notes',
         'resume',
+        'email_sent',
         'company_id',
+    ];
+    
+     protected $hidden = [
+        'password',
     ];
 }

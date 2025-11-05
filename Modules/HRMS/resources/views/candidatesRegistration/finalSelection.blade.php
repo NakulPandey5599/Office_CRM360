@@ -86,7 +86,7 @@
         }
 
         .table-container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
             background: white;
             border-radius: 10px;
@@ -117,6 +117,22 @@
             background: #f0fdf4;
         }
 
+        select {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            background: #fff;
+            color: #374151;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #059669;
+            box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
+        }
+
         .btn-send-email {
             padding: 6px 12px;
             border-radius: 6px;
@@ -136,6 +152,7 @@
             cursor: not-allowed;
         }
 
+        /* Popup Notification */
         .popup {
             position: fixed;
             top: 20px;
@@ -201,6 +218,7 @@
             <table>
                 <thead>
                     <tr>
+                        <th>#</th>
                         <th>Candidate</th>
                         <th>Position</th>
                         <th>Status</th>
@@ -208,22 +226,40 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($finalSelection as $selection)
+                    @forelse ($status as $index => $selection)
                         <tr>
+                            <td>{{ $index + 1 }}</td>
                             <td>{{ $selection->full_name }}</td>
                             <td>{{ $selection->job_profile }}</td>
-                            <td>{{ $selection->final_selection }}</td>
+                            <td>
+                                <select class="status-dropdown" data-id="{{ $selection->id }}">
+                                    <option value="On Hold"
+                                        {{ $selection->final_selection == 'On Hold' || is_null($selection->final_selection) ? 'selected' : '' }}>
+                                        On Hold
+                                    </option>
+                                    <option value="Selected"
+                                        {{ $selection->final_selection == 'Selected' ? 'selected' : '' }}>
+                                        Selected
+                                    </option>
+                                    <option value="Rejected"
+                                        {{ $selection->final_selection == 'Rejected' ? 'selected' : '' }}>
+                                        Rejected
+                                    </option>
+                                </select>
+                            </td>
+
+
                             <td>
                                 <button class="btn-send-email {{ $selection->email_sent ? 'already-sent' : '' }}"
-                                    data-id="{{ $selection->id }}"
-                                    {{ $selection->email_sent ? 'disabled' : '' }}>
+                                    data-id="{{ $selection->id }}" {{ $selection->email_sent ? 'disabled' : '' }}>
                                     {{ $selection->email_sent ? 'Already Sent' : 'Send Email' }}
                                 </button>
+
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" style="color: #9ca3af; font-style: italic;">No final selections yet</td>
+                            <td colspan="5" style="color: #9ca3af; font-style: italic;">No final selections yet</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -243,6 +279,7 @@
             setTimeout(() => popup.fadeOut(500, () => popup.remove()), 3000);
         }
 
+        // ✅ Send Email Logic
         $(document).on('click', '.btn-send-email', function(e) {
             e.preventDefault();
             const button = $(this);
@@ -262,8 +299,7 @@
                 },
                 success: function(response) {
                     if (response.status === 'success') {
-                        button.text('Already Sent')
-                            .addClass('already-sent')
+                        button.text('Already Sent').addClass('already-sent')
                             .css({
                                 background: '#9ca3af',
                                 cursor: 'not-allowed'
@@ -277,6 +313,28 @@
                 error: function() {
                     showPopup('❌ Something went wrong!', 'error');
                     button.prop('disabled', false).text('Send Email');
+                }
+            });
+        });
+
+        // ✅ Dynamic Status Update via AJAX
+        $(document).on('change', '.status-dropdown', function() {
+            const dropdown = $(this);
+            const candidateId = dropdown.data('id');
+            const newStatus = dropdown.val();
+
+            $.ajax({
+                url: '/hrms/update-final-status/' + candidateId,
+                type: 'PUT',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    final_selection: newStatus
+                },
+                success: function(response) {
+                    showPopup('✅ ' + response.message, 'success');
+                },
+                error: function() {
+                    showPopup('❌ Failed to update status!', 'error');
                 }
             });
         });

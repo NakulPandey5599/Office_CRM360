@@ -13,6 +13,7 @@ use Modules\HRMS\Http\Controllers\OfferLetterController;
 use Modules\HRMS\Http\Controllers\RecruitmentController;
 use Modules\HRMS\Http\Controllers\NewCandidateController;
 use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
+use Modules\HRMS\Http\Controllers\CandidateAuthController;
 use Modules\HRMS\Http\Controllers\JoiningLetterController;
 use Modules\HRMS\Http\Controllers\CandidatesListController;
 use Modules\HRMS\Http\Controllers\FinalSelectionController;
@@ -32,10 +33,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('hrms/candidate/{id}', [CandidatesListController::class, 'destroy'])->name('candidate.destroy');
     Route::put('hrms/candidate/update/{id}', [CandidatesListController::class, 'update'])->name('candidate.update');
 
-    //Interview Routes
-    Route::get('hrms/interview', [InterviewController::class, 'index'])->name('interviews.index');
+    // pre-joining process candidate login route 
+    
+Route::get('/candidate/login', [CandidateAuthController::class, 'showLoginForm'])->name('candidate.login');
+Route::post('/candidate/login', [CandidateAuthController::class, 'login'])->name('candidate.login.submit');
+Route::get('/candidate/logout', [CandidateAuthController::class, 'logout'])->name('candidate.logout');
+
+
+      //Interview Routes
+      Route::get('hrms/interview', [InterviewController::class, 'index'])->name('interviews.index');
+      Route::put('/hrms/interview/update/{id}', [InterviewController::class, 'updateStatus'])->name('interview.updateStatus');
+
     //Final Selection Routes
     Route::get('hrms/final-selections', [FinalSelectionController::class, 'index'])->name('final-selections.index');
+    Route::put('/hrms/update-final-status/{id}', [FinalSelectionController::class, 'updateFinalStatus'])->name('updateFinalStatus');
+
 });
 
 //pre-processing Routes
@@ -73,14 +85,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
   Route::post('/hrms/joining-letter/send-email', [JoiningLetterController::class, 'sendEmail'])->name('joining-letter.sendEmail');
   Route::post('/hrms/joining-letter/download', [JoiningLetterController::class, 'downloadPDF'])->name('hrms.joining.download');
 
-  Route::get('/hrms/training-assessment', [TrainingAssessmentController::class, 'index'])->name('trainingAssessment.index');
   Route::post('hrms/training/add-module', [TrainingAssessmentController::class, 'store'])->name('training.addModule');
+  Route::get('hrms/training/create-module', [TrainingAssessmentController::class, 'create'])->name('training.createModule');
+  Route::get('hrms/training/create-mcq', [TrainingAssessmentController::class, 'storeMcq'])->name('training.addMcq');
 
+  Route::get('/hrms/training-assessment', [TrainingAssessmentController::class, 'index'])->name('trainingAssessment.index');
   Route::get('/hrms/training-assessment/mcq', [TrainingAssessmentController::class, 'mcq'])->name('trainingAssessment.mcq');
   Route::post('/training/submit', [TrainingAssessmentController::class, 'storeAnswers'])->name('training.submit');
 
 
-  Route::get('/hrms/report', [ReportController::class, 'index'])->name('report.index');
+  Route::get('/hrms/report', [ReportController::class, 'index'])->name('report.index'); 
   Route::get('/hrms/dashboard',[DashboardController::class, 'index'])->name('dashboard.index');
   
   //Payroll Routes
@@ -89,7 +103,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
   Route::get('/hrms/payroll/finalized-payroll', [PayrollController::class, 'finalizedPayroll'])->name('finalizedPayroll.index');
 
 
-  Route::get('/hrms/payroll/bulk-attendence', [AttendanceController::class, 'bulkAttendence'])->name('bulkAttendence.index');
+Route::get('/hrms/payroll/bulk-attendence', [AttendanceController::class, 'bulkAttendence'])->name('bulkAttendence.index');
 Route::get('/bulk-attendance/filter', [AttendanceController::class, 'filter'])->name('bulk.attendance.filter');
 Route::post('/bulk-attendance/save', [AttendanceController::class, 'save'])->name('bulk.attendance.save');
 Route::post('/attendance/mark', [AttendanceController::class, 'storeAttendance'])->name('attendance.mark.store');

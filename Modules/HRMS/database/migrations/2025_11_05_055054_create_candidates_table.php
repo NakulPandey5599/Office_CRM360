@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('candidates', function (Blueprint $table) {
             $table->id();
-
+            
             // Candidate Info
             $table->string('full_name');
             $table->string('email')->unique();
@@ -25,23 +25,27 @@ return new class extends Migration
             $table->string('job_profile');
 
             // Interview Info
-            $table->string('interview_mode'); 
+            $table->string('interview_mode');
             $table->date('interview_date');
             $table->time('interview_time')->nullable();
             $table->string('status');
 
             // Final Selection
-            $table->string('final_selection'); 
+            $table->string('final_selection')->nullable()->default('on hold');
 
             // Other Details
             $table->text('notes')->nullable();
 
             // File Upload
             $table->string('resume');
-            $table->timestamps();
 
             // New company_id field
-            $table->unsignedBigInteger('company_id')->default(123); 
+            $table->unsignedBigInteger('company_id')->default(123);
+            $table->boolean('email_sent')->default(false);
+            $table->string('password')->nullable();
+
+
+            $table->timestamps();
         });
     }
 

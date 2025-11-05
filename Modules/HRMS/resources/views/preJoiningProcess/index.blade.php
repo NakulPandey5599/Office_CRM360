@@ -9,39 +9,6 @@
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display:flex; min-height:100vh; background:#fff; color:black; }
 
-/* Sidebar */
-.sidebar {
-  width: 280px;
-  background: linear-gradient(to right,#90caf9,#047edf 99%);
-  color: #fff;
-  padding: 25px 15px;
-  border-top-right-radius: 25px;
-  border-bottom-right-radius: 25px;
-  box-shadow: 8px 0 25px rgba(0,0,0,0.3);
-  overflow-y:auto;
-  position:fixed;
-  top:0; left:0; bottom:0; z-index:10;
-}
-.sidebar h2 { text-align:center; font-size:24px; margin-bottom:20px; font-weight:700; color:#fff; text-shadow:0 2px 4px rgba(0,0,0,0.4); }
-.menu-section { margin-bottom:22px; }
-.menu-section h3, .submenu .dropdown-btn {
-  font-size:16px; cursor:pointer; padding:12px 15px 12px 45px;
-  background: rgba(255,255,255,0.08); border-radius:10px;
-  transition: all 0.3s ease; display:flex; align-items:center; font-weight:500; color:#fff; position:relative;
-}
-.menu-section h3:hover, .submenu .dropdown-btn:hover { background: rgba(255,255,255,0.12); transform:translateX(5px); }
-.submenu { list-style:none; display:none; padding-left:15px; margin-top:8px; }
-.submenu.open { display:block; }
-.submenu li { margin-bottom:5px; }
-.submenu a, .submenu .dropdown-btn { display:flex; align-items:center; padding:10px 15px; border-radius:8px; font-size:14px; color:#fff; text-decoration:none; gap:10px; transition:0.3s; }
-.submenu a:hover, .submenu .dropdown-btn:hover { background: rgba(255,255,255,0.1); transform:translateX(5px); }
-.arrow { margin-left:auto; font-size:12px; opacity:0.7; transition:transform .3s; }
-.active .arrow { transform:rotate(90deg); }
-.dropdown-container { list-style:none; display:none; padding-left:30px; margin-top:5px; }
-.dropdown-container.open { display:block; }
-.dropdown-container a { display:flex; align-items:center; padding:8px 12px; border-radius:6px; font-size:13px; color:#fff; text-decoration:none; gap:10px; transition:0.3s; }
-.dropdown-container a:hover { background: rgba(255,255,255,0.15); transform:translateX(5px); }
-
 /* Main content */
 .main-content { margin-left:280px; flex:1; padding:20px; display:flex; flex-direction:column; }
 
@@ -73,13 +40,13 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display:fle
 <body>
 
 <!-- Sidebar -->
- @include('hrms::partials.sidebar')
+ {{-- @include('hrms::partials.sidebar') --}}
 
 <!-- Main content -->
 <div class="main-content">
 <div class="top-bar">
   <div>Pre-Joining Process</div>
-  <div>Admin <button class="logout-btn">Logout</button></div>
+  {{-- <div>Admin <button class="logout-btn">Logout</button></div> --}}
 </div>
 
 {{-- <!-- success Message -->

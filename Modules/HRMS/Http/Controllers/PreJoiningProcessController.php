@@ -5,28 +5,65 @@ namespace Modules\HRMS\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\Controller;
 use Modules\HRMS\Models\PreJoiningEmployee;
+use Modules\HRMS\Models\Candidates;
 
 class PreJoiningProcessController extends Controller
 {
     public function index()
     {
-        return view('hrms::preJoiningProcess.index');
+        // 🔒 Check login manually
+        if (!Session::has('candidate_id')) {
+            return redirect()->route('hrms::preJoiningProcess.login')->withErrors('Please login first.');
+        }
+
+        // Candidate data (if needed for autofill)
+        $candidate = Candidates::find(Session::get('candidate_id'));
+
+
+        return view('hrms::preJoiningProcess.index', compact('candidate'));
     }
 
     public function fresher()
     {
-        return view('hrms::preJoiningProcess.fresher');
+        if (!Session::has('candidate_id')) {
+            return redirect()->route('hrms::preJoiningProcess.login')->withErrors('Please login first.');
+        }
+        $candidate = Candidates::find(Session::get('candidate_id'));
+
+        if ($candidate && $candidate->full_name) {
+        $nameParts = explode(' ', trim($candidate->full_name), 2);
+        $candidate->first_name = $nameParts[0] ?? '';
+        $candidate->last_name = $nameParts[1] ?? '';
+    }
+
+        return view('hrms::preJoiningProcess.fresher', compact('candidate'));
     }
 
     public function experienced()
     {
-        return view('hrms::preJoiningProcess.experience');
+        if (!Session::has('candidate_id')) {
+            return redirect()->route('hrms::preJoiningProcess.login')->withErrors('Please login first.');
+        }
+        $candidate = Candidates::find(Session::get('candidate_id'));
+
+        if ($candidate && $candidate->full_name) {
+        $nameParts = explode(' ', trim($candidate->full_name), 2);
+        $candidate->first_name = $nameParts[0] ?? '';
+        $candidate->last_name = $nameParts[1] ?? '';
+    }
+        return view('hrms::preJoiningProcess.experience', compact('candidate'));
     }
 
     public function store(Request $request)
     {
+        // 🔒 Prevent direct access (only logged-in candidates allowed)
+        if (!Session::has('candidate_id')) {
+            return redirect()->route('candidate.login')->withErrors('Session expired! Please login again.');
+        }
+
         $request->validate([
             'experience_type' => 'required|in:Fresher,Experienced',
             'first_name' => 'required|string|max:255',
@@ -42,6 +79,7 @@ class PreJoiningProcessController extends Controller
             'aadhaar_number' => 'nullable|string',
             'pan_proof' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'aadhaar_proof' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+
             // Education validation
             'highest_qualification.*' => 'nullable|string',
             'highest_university.*'    => 'nullable|string',
@@ -57,25 +95,26 @@ class PreJoiningProcessController extends Controller
             'tenth_year'   => 'nullable|digits:4',
             'tenth_percentage' => 'nullable|numeric',
             'tenth_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+
             // Family info
             'father_name'  => 'required|string',
             'mother_name'  => 'required|string',
             'emergency_contact_name' => 'required|string',
             'emergency_contact_number' => 'required|digits:10',
-            // Experience validation only if experienced
+
+            // Experience validation (only for experienced)
             'company_name.*' => 'required_if:experience_type,Experienced|string',
             'designation.*'  => 'required_if:experience_type,Experienced|string',
             'duration.*'     => 'required_if:experience_type,Experienced|string',
             'reason_for_leaving.*' => 'required_if:experience_type,Experienced|string',
         ]);
 
-        // Upload required files
+        // ✅ File uploads
         $panPath = $request->file('pan_proof')->store('documents/pan', 'public');
         $aadhaarPath = $request->file('aadhaar_proof')->store('documents/aadhaar', 'public');
         $pucDoc = $request->hasFile('puc_document') ? $request->file('puc_document')->store('documents/puc', 'public') : null;
         $tenthDoc = $request->hasFile('tenth_document') ? $request->file('tenth_document')->store('documents/tenth', 'public') : null;
 
-        // University documents (multiple)
         $universityDocs = [];
         if ($request->hasFile('university_document')) {
             foreach ($request->file('university_document') as $file) {
@@ -83,7 +122,6 @@ class PreJoiningProcessController extends Controller
             }
         }
 
-        // For experienced type – optional file fields
         $expCerts = [];
         if ($request->hasFile('experience_certificate')) {
             foreach ($request->file('experience_certificate') as $file) {
@@ -98,8 +136,9 @@ class PreJoiningProcessController extends Controller
             }
         }
 
-        // Save data
+        // ✅ Save form data
         PreJoiningEmployee::create([
+            'candidate_id' => Session::get('candidate_id'), // link with logged in candidate
             'experience_type' => $request->experience_type,
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,

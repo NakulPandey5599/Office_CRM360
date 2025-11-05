@@ -125,7 +125,7 @@
     <div class="main-content2">
         <div class="top-bar">
             <div>Training Module</div>
-            <div>Admin <button class="logout-btn">Logout</button></div>
+            {{-- <div>Admin <button class="logout-btn">Logout</button></div> --}}
         </div>
 
         <div class="training-container">
@@ -138,9 +138,9 @@
       @endif
     </h2>
 
-    <button class="add-module-btn" id="openAddModule">
+    {{-- <button class="add-module-btn" id="openAddModule">
       <i class="fa fa-plus"></i> Add Module
-    </button>
+    </button> --}}
   </div>
 
   @if($latestModule)

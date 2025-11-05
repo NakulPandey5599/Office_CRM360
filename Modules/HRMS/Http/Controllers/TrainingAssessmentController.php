@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Modules\HRMS\Models\TrainingMcq;
 use Modules\HRMS\Models\TrainingModule;
 
 class TrainingAssessmentController extends Controller
@@ -21,10 +22,19 @@ class TrainingAssessmentController extends Controller
     return view('hrms::trainingAssessment.index', compact('latestModule'));
 }
 
+ public function create()
+{
+    // Fetch only the most recent module
+    $latestModule = TrainingModule::latest()->first();
+
+    return view('hrms::trainingAssessment.create', compact('latestModule'));
+}
+
  
     public function mcq()
     {
-        return view('hrms::trainingAssessment.mcq');
+        $mcqs = TrainingMcq::all();
+        return view('hrms::trainingAssessment.mcq', compact('mcqs'));
     }
 
 public function storeAnswers(Request $request)
@@ -79,5 +89,36 @@ public function store(Request $request)
     }
 }
 
+
+public function storeMcq(Request $request)
+{
+    $request->validate([
+        'module_id' => 'required|exists:training_modules,id',
+        'questions' => 'required|array|min:1',
+        'questions.*.question' => 'required|string',
+        'questions.*.option_a' => 'required|string',
+        'questions.*.option_b' => 'required|string',
+        'questions.*.option_c' => 'required|string',
+        'questions.*.option_d' => 'required|string',
+        'questions.*.correct_option' => 'required|in:A,B,C,D',
+    ]);
+
+    foreach ($request->questions as $q) {
+        TrainingMcq::create([
+            'module_id' => $request->module_id,
+            'question' => $q['question'],
+            'option_a' => $q['option_a'],
+            'option_b' => $q['option_b'],
+            'option_c' => $q['option_c'],
+            'option_d' => $q['option_d'],
+            'correct_option' => $q['correct_option'],
+        ]);
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => 'All MCQs saved successfully!'
+    ]);
+}
 
 }

@@ -29,6 +29,10 @@
       </div>
     </li>
     <li><a href="{{ route('trainingAssessment.index') }}"><i class="fas fa-chalkboard-teacher"></i> Training & Assessment</a></li>
+
+    <li><a href="{{ route('training.createModule') }}"><i class="fas fa-chalkboard-teacher"></i> Add Training & Assessment</a></li>
+
+    
     <li><a href="{{ route('report.index') }}"><i class="fas fa-chart-bar"></i> Reports</a></li>
   </ul>
 </div>

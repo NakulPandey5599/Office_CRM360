@@ -390,7 +390,7 @@
                         </select>
                     </div>
 
-                    <h4>Final Selection</h4>
+                    {{-- <h4>Final Selection</h4>
                     <div class="form-group row2">
                         <select class="final-selection" name="final_selection">
                             <option disabled selected>Select Final Selection</option>
@@ -398,7 +398,7 @@
                             <option value="On Hold">On Hold</option>
                             <option value="Not Selected">Not Selected</option>
                         </select>
-                    </div>
+                    </div> --}}
 
                     <h4>Other Details</h4>
                     <div class="form-group row3">

@@ -376,13 +376,13 @@
             <div class="form-step active">
                 <h3>Personal Information</h3>
                 <div class="form-group">
-                    <div class="half-width"><input name="first_name" type="text" placeholder="Enter first name"
+                    <div class="half-width"><input name="first_name" type="text" value="{{ old('first_name', $candidate->first_name ?? '') }}" placeholder="Enter first name"
                             required></div>
-                    <div class="half-width"><input name="last_name" type="text" placeholder="Enter last name"
+                    <div class="half-width"><input name="last_name" type="text" value="{{ old('last_name', $candidate->last_name ?? '') }}" placeholder="Enter last name"
                             required></div>
-                    <div class="half-width"><input name="email" type="email" placeholder="Enter your email"
+                    <div class="half-width"><input name="email" type="email" value="{{ old('email', $candidate->email ?? '') }}" placeholder="Enter your email"
                             required></div>
-                    <div class="half-width"><input name="phone" type="tel" placeholder="Enter your phone number"
+                    <div class="half-width"><input name="phone" type="tel" value="{{ old('phone', $candidate->phone ?? '') }}" placeholder="Enter your phone number"
                             required pattern="\d{10}"></div>
                     <div class="third-width"><input name="dob" type="date" required></div>
                     <div class="third-width">
@@ -394,14 +394,19 @@
                         </select>
                     </div>
                     <div class="third-width">
-                        <select name="job_profile" required>
-                            <option value="">Select Job Profile</option>
-                            <option>Software Developer</option>
-                            <option>UI/UX Designer</option>
-                            <option>Project Manager</option>
-                            <option>HR Executive</option>
-                            <option>Other</option>
-                        </select>
+                         <select name="job_profile" class="prejoin-select">
+        <option value="">Select Job Profile</option>
+
+        <option value="Developer" {{ old('job_profile', $candidate->job_profile ?? '') == 'Developer' ? 'selected' : '' }}>Developer</option>
+        <option value="Designer" {{ old('job_profile', $candidate->job_profile ?? '') == 'Designer' ? 'selected' : '' }}>Designer</option>
+        <option value="Manager" {{ old('job_profile', $candidate->job_profile ?? '') == 'Manager' ? 'selected' : '' }}>Manager</option>
+        <option value="Tester" {{ old('job_profile', $candidate->job_profile ?? '') == 'Tester' ? 'selected' : '' }}>Tester</option>
+        <option value="HR" {{ old('job_profile', $candidate->job_profile ?? '') == 'HR' ? 'selected' : '' }}>HR</option>
+        <option value="Analyst" {{ old('job_profile', $candidate->job_profile ?? '') == 'Analyst' ? 'selected' : '' }}>Analyst</option>
+        <option value="Intern" {{ old('job_profile', $candidate->job_profile ?? '') == 'Intern' ? 'selected' : '' }}>Intern</option>
+        <option value="Support" {{ old('job_profile', $candidate->job_profile ?? '') == 'Support' ? 'selected' : '' }}>Support</option>
+        <option value="Other" {{ old('job_profile', $candidate->job_profile ?? '') == 'Other' ? 'selected' : '' }}>Other</option>
+    </select>
                     </div>
                     <div class="half-width"><input name="address" type="text" placeholder="Enter Address" required>
                     </div>

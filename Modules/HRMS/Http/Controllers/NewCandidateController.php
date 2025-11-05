@@ -51,7 +51,7 @@ class NewCandidateController extends Controller
                 'interview_date' => 'required|date',
                 'interview_time' => 'nullable',
                 'status' => 'required|string|max:100',
-                'final_selection' => 'required|string|max:100',
+                'final_selection' => 'nullable|string|max:100',
                 'notes' => 'nullable|string',
                 'resume' => 'required|file|mimes:pdf,doc,docx|max:2048',
             ]);

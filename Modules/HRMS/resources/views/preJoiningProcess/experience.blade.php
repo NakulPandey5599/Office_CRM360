@@ -68,13 +68,13 @@
             <div class="prejoin-form-step active">
                 <h3>Personal Information</h3>
                 <div class="prejoin-form-group">
-                    <div class="prejoin-half"><input name="first_name" type="text" class="prejoin-input"
+                    <div class="prejoin-half"><input name="first_name" type="text" value="{{ old('first_name', $candidate->first_name ?? '') }}" class="prejoin-input"
                             placeholder="Enter first name"></div>
-                    <div class="prejoin-half"><input name="last_name" type="text" class="prejoin-input"
+                    <div class="prejoin-half"><input name="last_name" type="text" value="{{ old('last_name', $candidate->last_name ?? '') }}" class="prejoin-input"
                             placeholder="Enter last name"></div>
-                    <div class="prejoin-half"><input name="email" type="email" class="prejoin-input"
+                    <div class="prejoin-half"><input name="email" type="email" value="{{ old('email', $candidate->email) }}" class="prejoin-input"
                             placeholder="Enter your email"></div>
-                    <div class="prejoin-half"><input name="phone" type="tel" class="prejoin-input"
+                    <div class="prejoin-half"><input name="phone" type="tel" value="{{ old('phone', $candidate->phone) }}" class="prejoin-input"
                             placeholder="Enter your phone number"></div>
                     <div class="prejoin-third"><input name="dob" type="text" class="prejoin-input"
                             placeholder="DD/MM/YYYY"></div>
@@ -86,16 +86,22 @@
                             <option>Other</option>
                         </select>
                     </div>
-                    <div class="prejoin-third">
-                        <select name="job_profile" class="prejoin-select">
-                            <option>Select Job Profile</option>
-                            <option>Software Developer</option>
-                            <option>UI/UX Designer</option>
-                            <option>Project Manager</option>
-                            <option>HR Executive</option>
-                            <option>Other</option>
-                        </select>
-                    </div>
+  <div class="prejoin-third">
+    <select name="job_profile" class="prejoin-select">
+        <option value="">Select Job Profile</option>
+
+        <option value="Developer" {{ old('job_profile', $candidate->job_profile ?? '') == 'Developer' ? 'selected' : '' }}>Developer</option>
+        <option value="Designer" {{ old('job_profile', $candidate->job_profile ?? '') == 'Designer' ? 'selected' : '' }}>Designer</option>
+        <option value="Manager" {{ old('job_profile', $candidate->job_profile ?? '') == 'Manager' ? 'selected' : '' }}>Manager</option>
+        <option value="Tester" {{ old('job_profile', $candidate->job_profile ?? '') == 'Tester' ? 'selected' : '' }}>Tester</option>
+        <option value="HR" {{ old('job_profile', $candidate->job_profile ?? '') == 'HR' ? 'selected' : '' }}>HR</option>
+        <option value="Analyst" {{ old('job_profile', $candidate->job_profile ?? '') == 'Analyst' ? 'selected' : '' }}>Analyst</option>
+        <option value="Intern" {{ old('job_profile', $candidate->job_profile ?? '') == 'Intern' ? 'selected' : '' }}>Intern</option>
+        <option value="Support" {{ old('job_profile', $candidate->job_profile ?? '') == 'Support' ? 'selected' : '' }}>Support</option>
+        <option value="Other" {{ old('job_profile', $candidate->job_profile ?? '') == 'Other' ? 'selected' : '' }}>Other</option>
+    </select>
+</div>
+
                     <div class="prejoin-half"><input name="address" type="text" class="prejoin-input"
                             placeholder="Enter Address"></div>
                     <div class="prejoin-half"><input name="permanent_address" type="text" class="prejoin-input"
