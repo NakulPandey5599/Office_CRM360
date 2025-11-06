@@ -13,20 +13,18 @@ class McqAnswer extends Model
     /**
      * The table associated with the model.
      */
-    protected $table = 'mcq_answers';
+    protected $table = 'assessment_results';
 
-    /**
-     * The attributes that are mass assignable.
-     */
+    
     protected $fillable = [
         'user_id',
+        'assessment_id',
+        'score',
+        'total',
         'answers',
     ];
 
-    /**
-     * The attributes that should be cast.
-     */
     protected $casts = [
-        'answers' => 'array', // automatically decode/encode JSON
+        'answers' => 'array',
     ];
 }

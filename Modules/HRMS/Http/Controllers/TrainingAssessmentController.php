@@ -4,8 +4,10 @@ namespace Modules\HRMS\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Modules\HRMS\Models\McqAnswer;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Modules\HRMS\Models\TrainingMcq;
 use Modules\HRMS\Models\TrainingModule;
 
@@ -18,6 +20,7 @@ class TrainingAssessmentController extends Controller
 {
     // Fetch only the most recent module
     $latestModule = TrainingModule::latest()->first();
+    
 
     return view('hrms::trainingAssessment.index', compact('latestModule'));
 }
@@ -31,27 +34,66 @@ class TrainingAssessmentController extends Controller
 }
 
  
-    public function mcq()
-    {
-        $mcqs = TrainingMcq::all();
-        return view('hrms::trainingAssessment.mcq', compact('mcqs'));
+    // public function mcq()
+    // {
+    //     $mcqs = TrainingMcq::all();
+    //     return view('hrms::trainingAssessment.mcq', compact('mcqs'));
+    // }
+    
+   public function mcq()
+{
+    $latest = TrainingMcq::latest()->first();
+
+    if (!$latest) {
+        return view('hrms::trainingAssessment.mcq', [
+            'questions' => [],
+            'assessment' => null
+        ]);
     }
+
+    // Decode questions JSON
+    $questions = collect($latest->questions)->map(function ($q, $index) {
+        return [
+            'id' => $index + 1,
+            'text' => $q['question'] ?? '',
+            'options' => [
+                'A' => $q['option_a'] ?? '',
+                'B' => $q['option_b'] ?? '',
+                'C' => $q['option_c'] ?? '',
+                'D' => $q['option_d'] ?? '',
+            ],
+            'correct' => $q['correct_option'] ?? '',
+        ];
+    });
+
+    return view('hrms::trainingAssessment.mcq', [
+        'assessment' => $latest,
+        'questions' => $questions,
+    ]);
+}
+
+
 
 public function storeAnswers(Request $request)
-    {
-        // Get all answers from frontend
-        $data = $request->all();
+{
+    $data = $request->validate([
+        'assessment_id' => 'required|integer',
+        'score' => 'required|integer',
+        'total' => 'required|integer',
+        'answers' => 'required|array',
+    ]);
 
-        // Save into database (as JSON)
-        DB::table('mcq_answers')->insert([
-            'user_id' => auth()->id() ?? null,
-            'answers' => json_encode($data),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+    McqAnswer::create([
+        'user_id' => Auth::id() ?? null,
+        'assessment_id' => $data['assessment_id'],
+        'score' => $data['score'],
+        'total' => $data['total'],
+        'answers' => $data['answers'],
+    ]);
 
-        return response()->json(['message' => '✅ Answers saved successfully!']);
-    }
+    return response()->json(['success' => true, 'message' => 'Result stored successfully!']);
+}
+
 
 public function store(Request $request)
 {
@@ -90,10 +132,11 @@ public function store(Request $request)
 }
 
 
-public function storeMcq(Request $request)
+
+public function addMcq(Request $request)
 {
     $request->validate([
-        'module_id' => 'required|exists:training_modules,id',
+        'assessment_name' => 'nullable|string|max:255',
         'questions' => 'required|array|min:1',
         'questions.*.question' => 'required|string',
         'questions.*.option_a' => 'required|string',
@@ -103,21 +146,17 @@ public function storeMcq(Request $request)
         'questions.*.correct_option' => 'required|in:A,B,C,D',
     ]);
 
-    foreach ($request->questions as $q) {
-        TrainingMcq::create([
-            'module_id' => $request->module_id,
-            'question' => $q['question'],
-            'option_a' => $q['option_a'],
-            'option_b' => $q['option_b'],
-            'option_c' => $q['option_c'],
-            'option_d' => $q['option_d'],
-            'correct_option' => $q['correct_option'],
-        ]);
-    }
+    $assessmentName = $request->assessment_name ?: 'Assessment - ' . now()->format('Y-m-d H:i:s');
+
+    // ✅ Save all questions as one JSON
+    TrainingMcq::create([
+        'assessment_name' => $assessmentName,
+        'questions' => $request->questions,
+    ]);
 
     return response()->json([
         'success' => true,
-        'message' => 'All MCQs saved successfully!'
+        'message' => "Assessment '$assessmentName' saved successfully!"
     ]);
 }
 

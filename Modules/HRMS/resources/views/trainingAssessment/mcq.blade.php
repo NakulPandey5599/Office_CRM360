@@ -1,238 +1,283 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  <title>MCQ Assessment - {{ $module->title ?? 'Training Module' }}</title>
-  <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+
+  <title>MCQ Assessment - {{ $assessment->assessment_name ?? 'Training Module' }}</title>
+
   <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: #f9fafb;
-      color: #111827;
+    /* ===================== MCQ PAGE STYLES ===================== */
+
+    .mcq {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
       margin: 0;
-      padding: 0;
+      background: #f0f2f5;
+      --primary: #4361ee;
+      --primary-light: #4895ef;
+      --primary-dark: #3a0ca3;
+      --bg-primary: #f8fafc;
+      --bg-secondary: #f1f5f9;
+      --bg-card: #ffffff;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --border-light: #e2e8f0;
+      --border-medium: #cbd5e1;
     }
+
     .mcq-container {
-      max-width: 750px;
-      margin: 50px auto;
       background: #fff;
       border-radius: 12px;
-      padding: 30px 40px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 600px;
+      min-height: 400px;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
+
     .mcq-header {
-      font-size: 22px;
-      font-weight: 700;
-      color: #2563eb;
-      margin-bottom: 5px;
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #047edf;
     }
+
     .mcq-sub {
-      font-size: 14px;
-      color: #6b7280;
-      margin-bottom: 25px;
+      font-size: 15px;
+      color: #555;
+      margin-bottom: 20px;
     }
+
     .mcq-question {
       font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 18px;
+      font-weight: bold;
+      margin-bottom: 20px;
     }
-    .options label {
-      display: block;
-      padding: 12px;
-      margin-bottom: 10px;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      background: #f3f4f6;
+
+    .options {
+      flex-grow: 1;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+      font-size: 16px;
       cursor: pointer;
-      transition: all 0.25s ease;
     }
-    .options label:hover {
-      background: #e5e7eb;
+
+    .option input {
+      margin-right: 12px;
     }
-    .options input[type="radio"] {
-      margin-right: 10px;
-    }
+
     .btn-group1 {
       display: flex;
       justify-content: space-between;
-      margin-top: 30px;
+      margin-top: 20px;
     }
+
     .btn {
-      padding: 10px 18px;
+      flex: 1;
+      margin: 0 5px;
+      padding: 12px;
       border: none;
+      font-size: 16px;
+      font-weight: bold;
       border-radius: 8px;
       cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s ease;
+      transition: background 0.3s;
     }
-    .back-btn { background: #9ca3af; color: white; }
-    .reset-btn { background: #f59e0b; color: white; }
-    .submit-btn { background: #10b981; color: white; }
-    .next-btn { background: #2563eb; color: white; }
-    .btn:hover { opacity: 0.9; }
+
+    .back-btn {
+      background: #6b7280;
+      color: white;
+    }
+    .back-btn:hover {
+      background: #4b5563;
+    }
+
+    .reset-btn {
+      background: #f43f5e;
+      color: white;
+    }
+    .reset-btn:hover {
+      background: #e11d48;
+    }
+
+    .submit-btn {
+      background: #047edf;
+      color: white;
+    }
+    .submit-btn:hover {
+      background: #0369a1;
+    }
+
+    .next-btn {
+      background: #22c55e;
+      color: white;
+    }
+    .next-btn:hover {
+      background: #16a34a;
+    }
+
     .result-box {
+      margin-top: 20px;
       text-align: center;
-      padding: 20px;
-      background: #ecfdf5;
+      padding: 12px;
+      background: #dcfce7;
+      color: #166534;
       border-radius: 8px;
-      color: #065f46;
       font-weight: 600;
       display: none;
-      margin-top: 20px;
     }
   </style>
 </head>
 
-<body>
+<body class="mcq">
   <div class="mcq-container">
-    <div>
-      <div class="mcq-header">MCQ Assessment: {{ $module->title ?? 'Training Module' }}</div>
-      <div class="mcq-sub" id="question-count">Question 1 of {{ count($mcqs) }}</div>
-      <div id="question-container"></div>
-    </div>
+    @if($assessment)
+      <div>
+        <div class="mcq-header">MCQ Assessment: {{ $assessment->assessment_name }}</div>
+        <div class="mcq-sub" id="question-count">Question 1 of {{ count($questions) }}</div>
 
-```
-<!-- Buttons -->
-<div class="btn-group1">
-  <button class="btn back-btn" onclick="prevQuestion()">Back</button>
-  <button class="btn reset-btn" onclick="resetForm()">Reset</button>
-  <button class="btn submit-btn" onclick="submitAnswer()">Submit</button>
-  <button class="btn next-btn" onclick="nextQuestion()">Next</button>
-</div>
+        <div id="question-container"></div>
+      </div>
 
-<div id="resultBox" class="result-box"></div>
-```
-
+      <!-- Buttons -->
+      <div>
+        <div class="btn-group1">
+          <button class="btn back-btn" onclick="prevQuestion()">Back</button>
+          <button class="btn reset-btn" onclick="resetForm()">Reset</button>
+          <button class="btn submit-btn" onclick="submitAnswer()">Submit</button>
+          <button class="btn next-btn" onclick="nextQuestion()">Next</button>
+        </div>
+        <div id="resultBox" class="result-box"></div>
+      </div>
+    @else
+      <div>
+        <div class="mcq-header">No Assessment Found</div>
+        <p style="color: #555;">Please create a new assessment first.</p>
+      </div>
+    @endif
   </div>
 
+  @if($assessment)
+  
   <script>
-    // ✅ Dynamically loaded MCQs from backend
-    const questions = @json(
-    $mcqs->map(function($q) {
-      return [
-        'id' => $q->id,
-        'text' => $q->question,
-        'options' => [
-          'A' => $q->option_a,
-          'B' => $q->option_b,
-          'C' => $q->option_c,
-          'D' => $q->option_d,
-        ],
-        'correct' => $q->correct_option,
-      ];
-    })
-  );
+  // ✅ Load questions dynamically from backend
+  const questions = @json($questions);
+  let currentQuestion = 0;
+  const answers = {};
+  const container = document.getElementById("question-container");
+  const qCount = document.getElementById("question-count");
+  const resultBox = document.getElementById("resultBox");
 
-    let currentQuestion = 0;
-    const answers = {};
-    const questionContainer = document.getElementById("question-container");
-    const questionCount = document.getElementById("question-count");
-    const resultBox = document.getElementById("resultBox");
+  function renderQuestion() {
+    const q = questions[currentQuestion];
+    qCount.textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+    container.innerHTML = `
+      <div class="mcq-question">${q.text}</div>
+      <div class="options">
+        ${Object.entries(q.options).map(([key, value]) => `
+          <label class="option">
+            <input type="radio" name="q${currentQuestion}" value="${key}" ${answers[currentQuestion] === key ? "checked" : ""}>
+            ${key}. ${value}
+          </label>
+        `).join('')}
+      </div>
+    `;
+    resultBox.style.display = "none";
+  }
 
-    loadQuestion();
+  function resetForm() {
+    document.querySelectorAll(`input[name="q${currentQuestion}"]`).forEach(el => el.checked = false);
+    delete answers[currentQuestion];
+  }
 
-    function loadQuestion() {
-      const q = questions[currentQuestion];
-      questionCount.textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
-      resultBox.style.display = 'none';
-
-      questionContainer.innerHTML = `
-        <div class="mcq-question">${q.text}</div>
-        <div class="options">
-          ${Object.entries(q.options).map(([key, opt]) => `
-            <label>
-              <input type="radio" name="q${currentQuestion}" value="${key}" ${
-                answers[currentQuestion] === key ? "checked" : ""
-              }> (${key}) ${opt}
-            </label>
-          `).join("")}
-        </div>
-      `;
+  async function nextQuestion() {
+    const selected = document.querySelector(`input[name="q${currentQuestion}"]:checked`);
+    if (selected) answers[currentQuestion] = selected.value;
+    if (currentQuestion < questions.length - 1) {
+      currentQuestion++;
+      renderQuestion();
+    } else {
+      await storeAndShowResult();
     }
+  }
 
-    function resetForm() {
-      document.querySelectorAll(`input[name="q${currentQuestion}"]`)
-        .forEach(el => el.checked = false);
-      delete answers[currentQuestion];
+  function prevQuestion() {
+    if (currentQuestion > 0) {
+      currentQuestion--;
+      renderQuestion();
     }
+  }
 
-    function prevQuestion() {
-      if (currentQuestion > 0) {
-        currentQuestion--;
-        loadQuestion();
-      }
+  async function submitAnswer() {
+    const selected = document.querySelector(`input[name="q${currentQuestion}"]:checked`);
+    if (!selected) {
+      alert("Please select an option before submitting!");
+      return;
     }
-
-    function submitAnswer() {
-      const selected = document.querySelector(`input[name="q${currentQuestion}"]:checked`);
-      if (selected) {
-        answers[currentQuestion] = selected.value;
-      } else {
-        alert("Please select an option before submitting!");
-        return;
-      }
-
-      if (currentQuestion < questions.length - 1) {
-        currentQuestion++;
-        loadQuestion();
-      } else {
-        finishQuiz();
-      }
+    answers[currentQuestion] = selected.value;
+    if (currentQuestion < questions.length - 1) {
+      currentQuestion++;
+      renderQuestion();
+    } else {
+      await storeAndShowResult();
     }
+  }
 
-    function nextQuestion() {
-      const selected = document.querySelector(`input[name="q${currentQuestion}"]:checked`);
-      if (selected) {
-        answers[currentQuestion] = selected.value;
-      }
-      if (currentQuestion < questions.length - 1) {
-        currentQuestion++;
-        loadQuestion();
-      } else {
-        finishQuiz();
-      }
-    }
+  // ✅ Compute score + Store in DB automatically
+  async function storeAndShowResult() {
+    let correct = 0;
+    Object.keys(answers).forEach((key) => {
+      if (answers[key] === questions[key].correct) correct++;
+    });
 
-    // ✅ Final Quiz Submission
-    function finishQuiz() {
-      const formattedAnswers = {};
-      Object.keys(answers).forEach((key) => {
-        formattedAnswers[questions[key].id] = answers[key];
-      });
+    const score = correct;
+    const total = questions.length;
+    resultBox.textContent = `✅ You scored ${score} / ${total}`;
+    resultBox.style.display = "block";
 
-      // Calculate Score Client-side
-      let correctCount = 0;
-      Object.keys(answers).forEach((key) => {
-        if (answers[key] === questions[key].correct) {
-          correctCount++;
-        }
-      });
-      const total = questions.length;
-      const score = `${correctCount} / ${total}`;
-      resultBox.style.display = 'block';
-      resultBox.textContent = `✅ You scored ${score}`;
+    // ✅ Store in database
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
-      // Send to backend (optional)
-      fetch("{{ route('training.submitMcq') }}", {
+    try {
+      const response = await fetch("{{ route('training.storeAnswers') }}", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+          "X-CSRF-TOKEN": csrfToken,
         },
         body: JSON.stringify({
-          module_id: "{{ $module->id }}",
-          answers: formattedAnswers,
-          score: score
-        })
-      })
-      .then(res => res.json())
-      .then(data => console.log(data))
-      .catch(err => console.error(err));
-    }
-  </script>
+          assessment_id: {{ $assessment->id }},
+          score: score,
+          total: total,
+          answers: answers,
+        }),
+      });
 
+      const result = await response.json();
+      if (result.success) {
+        console.log("✅ Result stored successfully!");
+      } else {
+        console.warn("⚠️ Failed to store result", result);
+      }
+    } catch (error) {
+      console.error("❌ Error saving result:", error);
+    }
+  }
+
+  // Load the first question
+  renderQuestion();
+</script>
+
+  @endif
 </body>
 </html>

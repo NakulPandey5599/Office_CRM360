@@ -87,11 +87,11 @@ Route::get('/candidate/logout', [CandidateAuthController::class, 'logout'])->nam
 
   Route::post('hrms/training/add-module', [TrainingAssessmentController::class, 'store'])->name('training.addModule');
   Route::get('hrms/training/create-module', [TrainingAssessmentController::class, 'create'])->name('training.createModule');
-  Route::get('hrms/training/create-mcq', [TrainingAssessmentController::class, 'storeMcq'])->name('training.addMcq');
+  Route::post('hrms/training/create-mcq', [TrainingAssessmentController::class, 'addMcq'])->name('training.addMcq');
 
   Route::get('/hrms/training-assessment', [TrainingAssessmentController::class, 'index'])->name('trainingAssessment.index');
   Route::get('/hrms/training-assessment/mcq', [TrainingAssessmentController::class, 'mcq'])->name('trainingAssessment.mcq');
-  Route::post('/training/submit', [TrainingAssessmentController::class, 'storeAnswers'])->name('training.submit');
+  Route::post('/training/submit', [TrainingAssessmentController::class, 'storeAnswers'])->name('training.storeAnswers');
 
 
   Route::get('/hrms/report', [ReportController::class, 'index'])->name('report.index'); 

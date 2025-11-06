@@ -149,7 +149,7 @@
       <span id="step2" class="disabled-step">Step 2 of 2 (MCQ)</span>
     </div>
 
-    <video id="trainingVideo" controls>
+    <video id="trainingVideo" controls>`
       <source src="{{ $latestModule->video_path }}" type="video/mp4"/>
       Your browser does not support the video tag.
     </video>

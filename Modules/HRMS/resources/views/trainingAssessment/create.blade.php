@@ -305,6 +305,7 @@
   </div>
 
  <!-- ✅ Add Multiple MCQs Modal -->
+<!-- ✅ Add Multiple MCQs Modal -->
 <div id="addMcqModal" class="modal">
   <div class="modal-content">
     <button class="close-btn" id="closeMcqModal" aria-label="Close">&times;</button>
@@ -312,7 +313,15 @@
 
     <form id="addMcqForm">
       @csrf
-      <input type="hidden" name="module_id" value="{{ $latestModule->id ?? '' }}">
+
+      <!-- 🆕 Assessment Name Input -->
+      
+      <div id="mcqGroup" style="
+    margin-bottom: 10px;
+">
+      <label>Assessment Name</label>
+      <input type="text" name="assessment_name" placeholder="e.g. Communication Skills Test">
+      </div>
 
       <div id="mcqGroup">
         <!-- Default MCQ Block -->
@@ -363,7 +372,24 @@
   </div>
 </div>
 
+
   <script>
+    
+// Sidebar toggle
+function toggleMenu(header) {
+  const submenu = header.nextElementSibling;
+  const isOpen = submenu.classList.contains("open");
+  document.querySelectorAll('.submenu').forEach(menu => menu.classList.remove('open'));
+  document.querySelectorAll('.menu-section h3').forEach(menuHeader => menuHeader.classList.remove('active'));
+  if(!isOpen){ submenu.classList.add("open"); header.classList.add("active"); }
+}
+function toggleDropdown(trigger) {
+  const container = trigger.nextElementSibling;
+  const isOpen = container.classList.contains("open");
+  trigger.parentElement.parentElement.querySelectorAll(".dropdown-container").forEach(drop => drop.classList.remove("open"));
+  trigger.parentElement.parentElement.querySelectorAll(".dropdown-btn").forEach(btn => btn.classList.remove("active"));
+  if(!isOpen){ container.classList.add("open"); trigger.classList.add("active"); }
+}
     const moduleModal = document.getElementById('addModuleModal');
     const mcqModal = document.getElementById('addMcqModal');
     const openModuleBtn = document.getElementById('openAddModule');

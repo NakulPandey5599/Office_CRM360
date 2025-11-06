@@ -151,7 +151,7 @@
                         </div>
                         <div class="prejoin-file">
                             Upload Documents <br />
-                            <input type="file" name="university_documents[]" class="prejoin-input-file" multiple
+                            <input type="file" name="university_document[]" class="prejoin-input-file" 
                                 accept=".pdf,.jpg,.jpeg,.png">
                             <button type="button" class="prejoin-upload-btn">Browse Files</button>
                             <span class="file-name"></span>
@@ -164,13 +164,10 @@
                 <div class="prejoin-form-group">
                     <div class="prejoin-half"><input name="puc_college" type="text" class="prejoin-input"
                             placeholder="Enter College/Board"></div>
-                    <div class="prejoin-half">
-                        <select class="prejoin-select" name="puc_year">
-                            <option>Select year</option>
-                            <option>2024</option>
-                            <option>2023</option>
-                        </select>
-                    </div>
+<div class="prejoin-half">
+    <input type="text" name="puc_year" class="prejoin-input" placeholder="Enter Year of Passing">
+</div>
+
                     <div class="prejoin-half"><input name="puc_percentage" type="text" class="prejoin-input"
                             placeholder="Enter Percentage"></div>
                 </div>
@@ -187,12 +184,9 @@
                     <div class="prejoin-half"><input name="tenth_school" type="text" class="prejoin-input"
                             placeholder="Enter School/Board"></div>
                     <div class="prejoin-half">
-                        <select class="prejoin-select" name="tenth_year">
-                            <option>Select year</option>
-                            <option>2024</option>
-                            <option>2023</option>
-                        </select>
-                    </div>
+    <input type="text" name="tenth_year" class="prejoin-input" placeholder="Enter Year of Passing">
+</div>
+
                     <div class="prejoin-half"><input name="tenth_percentage" type="text" class="prejoin-input"
                             placeholder="Enter Percentage"></div>
                 </div>
@@ -250,7 +244,7 @@
                             <div class="prejoin-half">
                                 <div class="prejoin-file">
                                     Upload Salary Slip <br />
-                                    <input type="file" name="salary_slip" class="prejoin-input-file" />
+<input type="file" name="salary_slip[]" class="prejoin-input-file" accept=".pdf,.jpg,.jpeg,.png">
                                     <button type="button" class="prejoin-upload-btn">Upload Salary Slip</button>
                                     <span class="file-name"></span>
                                 </div>
@@ -259,8 +253,7 @@
                             <div class="prejoin-half">
                                 <div class="prejoin-file">
                                     Upload Experience Certificate <br />
-                                    <input type="file" name="experience_certificate[]"
-                                        class="prejoin-input-file" />
+<input type="file" name="experience_certificate[]" class="prejoin-input-file" accept=".pdf,.jpg,.jpeg,.png">
                                     <button type="button" class="prejoin-upload-btn">Upload Certificate</button>
                                     <span class="file-name"></span>
                                 </div>
@@ -295,20 +288,20 @@
             </div>
         </form>
     </div>
+
+
 <script>
 
 document.addEventListener('DOMContentLoaded', () => {
+    // === Success message fade ===
     const successMsg = document.getElementById('success-message');
     if (successMsg) {
         successMsg.style.transition = 'opacity 0.8s ease';
         setTimeout(() => {
             successMsg.style.opacity = '0';
             setTimeout(() => successMsg.remove(), 800);
-        }, 4000); // Hide after 4 seconds
+        }, 4000);
     }
-});
-
-document.addEventListener('DOMContentLoaded', () => {
 
     // === Multi-step form core ===
     let currentStep = 0;
@@ -325,6 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
 
         if (saveBtn.textContent.trim() === "Submit") {
+            updateEmploymentTable(); // ✅ ensure receiving_letter[] exists
             console.log("✅ Submitting form...");
             form.submit();
         } else {
@@ -411,50 +405,60 @@ document.addEventListener('DOMContentLoaded', () => {
     const section = document.getElementById("prejoin-employment-section");
     const tableBody = document.getElementById("employment-table-body");
 
-    function updateEmploymentTable() {
-        tableBody.innerHTML = '';
-        section.querySelectorAll('.prejoin-employment-block').forEach(block => {
-            const company = block.querySelector('input[name^="company_name"]').value;
-            const designation = block.querySelector('input[name^="designation"]').value;
-            const duration = block.querySelector('input[name^="duration"]').value;
+   function updateEmploymentTable() {
+    tableBody.innerHTML = '';
+    section.querySelectorAll('.prejoin-employment-block').forEach(block => {
+        const company = block.querySelector('input[name^="company_name"]').value;
+        const designation = block.querySelector('input[name^="designation"]').value;
+        const duration = block.querySelector('input[name^="duration"]').value;
 
-            if (company || designation || duration) {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${company}</td>
-                    <td>${designation}</td>
-                    <td>${duration}</td>
-                    <td>
-                        <div class="prejoin-file">
-                            <input type="file" class="receiving-letter-file" hidden />
-                            <button type="button" class="prejoin-browse-btn">Upload</button>
-                            <span class="file-name"></span>
-                        </div>
-                    </td>
-                `;
-                tableBody.appendChild(row);
+        if (company || designation || duration) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${company}</td>
+                <td>${designation}</td>
+                <td>${duration}</td>
+                <td>
+                    <div class="prejoin-file">
+                        <input type="file" name="receiving_letter[]" class="receiving-letter-file" hidden accept=".pdf,.jpg,.jpeg,.png">
+                        <button type="button" class="prejoin-browse-btn">Upload</button>
+                        <span class="file-name"></span>
+                    </div>
+                </td>
+            `;
+            tableBody.appendChild(row);
 
-                const input = row.querySelector('.receiving-letter-file');
-                const button = row.querySelector('.prejoin-browse-btn');
-                const fileNameSpan = row.querySelector('.file-name');
+            // ✅ Fix: also add the file input to the <form> DOM so Laravel receives it
+            const input = row.querySelector('.receiving-letter-file');
+            const button = row.querySelector('.prejoin-browse-btn');
+            const fileNameSpan = row.querySelector('.file-name');
 
-                button.addEventListener('click', e => {
-                    e.preventDefault();
-                    input.click();
-                });
+            // clone the input for form submission (since 'hidden' inside table)
+            const clonedInput = input.cloneNode(true);
+            clonedInput.classList.add('hidden-receiving-input');
+            document.getElementById('prejoin-multiStepForm').appendChild(clonedInput);
 
-                input.addEventListener('change', () => {
-                    fileNameSpan.textContent = input.files.length > 0
-                        ? Array.from(input.files).map(f => f.name).join(', ')
-                        : '';
-                });
-            }
-        });
-    }
+            button.addEventListener('click', e => {
+                e.preventDefault();
+                input.click();
+            });
+
+            // When user picks a file, mirror it into the appended input in <form>
+            input.addEventListener('change', () => {
+                fileNameSpan.textContent = input.files.length > 0
+                    ? Array.from(input.files).map(f => f.name).join(', ')
+                    : '';
+
+                // Sync chosen file into the cloned hidden input for actual submission
+                clonedInput.files = input.files;
+            });
+        }
+    });
+}
 
     function attachEmploymentListeners(block) {
         block.querySelectorAll('input[type="text"]').forEach(input => {
-            input.addEventListener('input', updateEmploymentTable);
+            input.addEventListener('blur', updateEmploymentTable);
         });
     }
 
@@ -477,11 +481,17 @@ document.addEventListener('DOMContentLoaded', () => {
         updateEmploymentTable();
     };
 
-    // === Initialize ===
+    // === Final Init ===
     initUploadButtons();
     updateEmploymentTable();
+
+    // ✅ Crucial fix: ensure dynamic receiving_letter[] exists at submit
+    form.addEventListener('submit', () => {
+        updateEmploymentTable();
+    });
 });
 </script>
+
 
 
 </body>

@@ -10,8 +10,9 @@ class TrainingMcq extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'module_id', 'question', 'option_a', 'option_b',
-        'option_c', 'option_d', 'correct_option'
+    protected $fillable = ['assessment_name', 'questions'];
+
+    protected $casts = [
+        'questions' => 'array', // automatically decode JSON to array
     ];
 }

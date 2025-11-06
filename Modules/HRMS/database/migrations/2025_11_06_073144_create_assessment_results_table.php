@@ -11,10 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('training_mcqs', function (Blueprint $table) {
+        Schema::create('assessment_results', function (Blueprint $table) {
             $table->id();
-            $table->string('assessment_name')->nullable();
-            $table->json('questions'); // ✅ all MCQs stored here
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('assessment_id')->nullable();
+            $table->integer('score');
+            $table->integer('total');
+            $table->json('answers')->nullable();
             $table->timestamps();
         });
     }
@@ -24,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('training_mcqs');
+        Schema::dropIfExists('assessment_results');
     }
 };

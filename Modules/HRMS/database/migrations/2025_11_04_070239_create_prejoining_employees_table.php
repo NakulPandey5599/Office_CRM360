@@ -60,7 +60,7 @@ return new class extends Migration
             $table->json('reason_for_leaving')->nullable();
             $table->json('experience_certificate')->nullable();
             $table->json('salary_slip')->nullable();
-            $table ->json('relieving_letter')->nullable();
+            $table->json('receiving_letter')->nullable();
             $table->timestamps();
         });
     }

@@ -51,7 +51,7 @@ class PreJoiningEmployee extends Model
         'reason_for_leaving',
         'experience_certificate',
         'salary_slip',
-        'relieving_letter',
+        'receiving_letter',
     ];
 
     // Cast JSON fields automatically to array
@@ -68,7 +68,7 @@ class PreJoiningEmployee extends Model
         'reason_for_leaving' => 'array',
         'experience_certificate' => 'array',
         'salary_slip' => 'array',
-        'relieving_letter' => 'array',
+        'receiving_letter' => 'array',
     ];
 
    

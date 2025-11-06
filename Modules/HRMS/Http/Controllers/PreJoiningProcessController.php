@@ -58,7 +58,14 @@ class PreJoiningProcessController extends Controller
     }
 
     public function store(Request $request)
-    {
+    {      dd([
+    'files' => array_keys($request->allFiles()),
+    'has_university_docs' => $request->hasFile('university_documents'),
+    'university_docs' => $request->file('university_documents'),
+    'has_receiving' => $request->hasFile('receiving_letter'),
+    'receiving' => $request->file('receiving_letter'),
+]);
+
         // 🔒 Prevent direct access (only logged-in candidates allowed)
         if (!Session::has('candidate_id')) {
             return redirect()->route('candidate.login')->withErrors('Session expired! Please login again.');
@@ -107,6 +114,8 @@ class PreJoiningProcessController extends Controller
             'designation.*'  => 'required_if:experience_type,Experienced|string',
             'duration.*'     => 'required_if:experience_type,Experienced|string',
             'reason_for_leaving.*' => 'required_if:experience_type,Experienced|string',
+            'receiving_letter.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+
         ]);
 
         // ✅ File uploads
@@ -135,6 +144,15 @@ class PreJoiningProcessController extends Controller
                 $salarySlips[] = $file->store('documents/salary_slip', 'public');
             }
         }
+
+       $receivingLetters = [];
+if ($request->hasFile('receiving_letter')) {
+    foreach ($request->file('receiving_letter') as $file) {
+        $receivingLetters[] = $file->store('documents/receiving_letter', 'public');
+    }
+}
+
+
 
         // ✅ Save form data
         PreJoiningEmployee::create([
@@ -177,6 +195,8 @@ class PreJoiningProcessController extends Controller
             'reason_for_leaving' => json_encode($request->reason_for_leaving),
             'experience_certificate' => json_encode($expCerts),
             'salary_slip' => json_encode($salarySlips),
+            'receiving_letter' => json_encode($receivingLetters),
+
         ]);
 
         return redirect()->back()->with('success', "{$request->experience_type} employee saved successfully!");

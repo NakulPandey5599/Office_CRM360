@@ -218,7 +218,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th>S.No.</th>
                         <th>Candidate</th>
                         <th>Position</th>
                         <th>Status</th>

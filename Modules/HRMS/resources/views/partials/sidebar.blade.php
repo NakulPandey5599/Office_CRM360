@@ -3,7 +3,7 @@
 <h2>HRMS</h2>
  <div class="menu-section">
     <h3>
-      <a href="main.html" style="color:white; text-decoration:none; display:flex; align-items:center; gap:10px;">
+      <a href="main.html" style="color:rgb(247, 245, 245); text-decoration:none; display:flex; align-items:center; gap:10px;">
         <i class="fas fa-home"></i> Dashboard
       </a>
     </h3>

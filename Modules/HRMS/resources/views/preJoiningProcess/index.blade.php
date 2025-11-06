@@ -93,21 +93,6 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display:fle
 </div>
 
 <script>
-// Sidebar toggle
-function toggleMenu(header) {
-  const submenu = header.nextElementSibling;
-  const isOpen = submenu.classList.contains("open");
-  document.querySelectorAll('.submenu').forEach(menu => menu.classList.remove('open'));
-  document.querySelectorAll('.menu-section h3').forEach(menuHeader => menuHeader.classList.remove('active'));
-  if(!isOpen){ submenu.classList.add("open"); header.classList.add("active"); }
-}
-function toggleDropdown(trigger) {
-  const container = trigger.nextElementSibling;
-  const isOpen = container.classList.contains("open");
-  trigger.parentElement.parentElement.querySelectorAll(".dropdown-container").forEach(drop => drop.classList.remove("open"));
-  trigger.parentElement.parentElement.querySelectorAll(".dropdown-btn").forEach(btn => btn.classList.remove("active"));
-  if(!isOpen){ container.classList.add("open"); trigger.classList.add("active"); }
-}
 // Navigation
 function goNext(){
   const selected=document.querySelector('input[name="experience_type"]:checked');

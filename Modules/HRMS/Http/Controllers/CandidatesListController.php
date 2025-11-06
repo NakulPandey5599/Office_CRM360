@@ -11,11 +11,15 @@ class CandidatesListController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        $candidates = Candidates::paginate(4);
-        return view('hrms::candidatesRegistration.candidatesListings', compact('candidates'));
-    }
+public function index()
+{
+    $candidates = Candidates::where('final_selection', 'selected')
+        ->orderBy('id', 'desc')
+        ->paginate(10);
+
+    return view('hrms::candidatesRegistration.candidatesListings', compact('candidates'));
+}
+
 
     /**
      * Remove the specified resource from storage.
@@ -28,15 +32,15 @@ class CandidatesListController extends Controller
         return redirect()->route('candidate.index')->with('success', 'Candidate deleted successfully.');
     }
 
-    public function update(Request $request, $id)
-{
-    $candidate = Candidates::findOrFail($id);
-    $candidate->update([
-        'status' => $request->status,
-        'final_selection' => $request->final_selection,
-    ]);
+//     public function update(Request $request, $id)
+// {
+//     $candidate = Candidates::findOrFail($id);
+//     $candidate->update([
+//         'status' => $request->status,
+//         'final_selection' => $request->final_selection,
+//     ]);
 
-    return response()->json(['success' => true]);
-}
+//     return response()->json(['success' => true]);
+// }
 
 }
