@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('assessment_name')->nullable();
             $table->json('questions'); // ✅ all MCQs stored here
+            $table->enum('status', ['active', 'inactive'])->default('inactive');
             $table->timestamps();
         });
     }

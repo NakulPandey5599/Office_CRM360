@@ -120,66 +120,65 @@
 </head>
 
 <body>
-    @include('hrms::partials.sidebar')
 
-    <div class="main-content2">
+    <div class="main-content2" style="margin-left: unset;">
         <div class="top-bar">
             <div>Training Module</div>
             {{-- <div>Admin <button class="logout-btn">Logout</button></div> --}}
         </div>
 
         <div class="training-container">
-  <div style="display: flex; justify-content: space-between; align-items: center;">
-    <h2>
-      @if($latestModule)
-        Training Module: {{ $latestModule->title }}
-      @else
-        No Training Module Available
-      @endif
-    </h2>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>
+                    @if ($latestModule)
+                        Training Module: {{ $latestModule->title }}
+                    @else
+                        No Training Module Available
+                    @endif
+                </h2>
 
-    {{-- <button class="add-module-btn" id="openAddModule">
+                {{-- <button class="add-module-btn" id="openAddModule">
       <i class="fa fa-plus"></i> Add Module
     </button> --}}
-  </div>
+            </div>
 
-  @if($latestModule)
-    <div class="steps">
-      <span class="active-step">Step 1 of 2 (Video)</span>
-      <span id="step2" class="disabled-step">Step 2 of 2 (MCQ)</span>
+            @if ($latestModule)
+                <div class="steps">
+                    <span class="active-step">Step 1 of 2 (Video)</span>
+                    <span id="step2" class="disabled-step">Step 2 of 2 (MCQ)</span>
+                </div>
+
+                <video id="trainingVideo" controls>`
+                    <source src="{{ $latestModule->video_path }}" type="video/mp4" />
+                    Your browser does not support the video tag.
+                </video>
+
+                <div class="module-details">
+                    <div class="module-box">
+                        <strong>Module Description</strong>
+                        <p>{{ $latestModule->description }}</p>
+                    </div>
+                    <div class="module-box">
+                        <strong>Duration</strong>
+                        <p>{{ $latestModule->duration ?? 'N/A' }}</p>
+                    </div>
+                    <div class="module-box">
+                        <strong>Status</strong>
+                        <p>{{ $latestModule->is_active ? 'Active' : 'Inactive' }}</p>
+                    </div>
+                </div>
+
+                <div id="congratsBox" class="congrats" style="display:none;">
+                    ✅ Congratulations! You’ve completed this training video. Now continue with your MCQ assessment.
+                </div>
+            @else
+                <p style="margin-top: 20px;">No training module uploaded yet.</p>
+            @endif
+        </div>
+
     </div>
 
-    <video id="trainingVideo" controls>`
-      <source src="{{ $latestModule->video_path }}" type="video/mp4"/>
-      Your browser does not support the video tag.
-    </video>
 
-    <div class="module-details">
-      <div class="module-box">
-        <strong>Module Description</strong>
-        <p>{{ $latestModule->description }}</p>
-      </div>
-      <div class="module-box">
-        <strong>Duration</strong>
-        <p>{{ $latestModule->duration ?? 'N/A' }}</p>
-      </div>
-      <div class="module-box">
-        <strong>Status</strong>
-        <p>{{ $latestModule->is_active ? 'Active' : 'Inactive' }}</p>
-      </div>
-    </div>
-
-    <div id="congratsBox" class="congrats" style="display:none;">
-      ✅ Congratulations! You’ve completed this training video. Now continue with your MCQ assessment.
-    </div>
-  @else
-    <p style="margin-top: 20px;">No training module uploaded yet.</p>
-  @endif
-</div>
-
-    </div>
-
-    
     <div id="addModuleModal" class="modal">
         <div class="modal-content">
             <button class="close-btn" id="closeModal">X</button>
@@ -209,43 +208,55 @@
             </form>
 
         </div>
-    </div> 
+    </div>
 
     <script>
-      function toggleMenu(header){
-        const submenu = header.nextElementSibling;
-        const isOpen = submenu.classList.contains("open");
-        document.querySelectorAll('.submenu').forEach(menu => menu.classList.remove('open'));
-        document.querySelectorAll('.menu-section h3').forEach(menuHeader => menuHeader.classList.remove('active'));
-        if(!isOpen){ submenu.classList.add("open"); header.classList.add("active"); }
-      }
-      function toggleDropdown(trigger){
-        const container = trigger.nextElementSibling;
-        const isOpen = container.classList.contains("open");
-        trigger.parentElement.parentElement.querySelectorAll(".dropdown-container").forEach(drop => drop.classList.remove("open"));
-        trigger.parentElement.parentElement.querySelectorAll(".dropdown-btn").forEach(btn => btn.classList.remove("active"));
-        if(!isOpen){ container.classList.add("open"); trigger.classList.add("active"); }
-      }
-      
-      const video = document.getElementById('trainingVideo');
-      const congrats = document.getElementById('congratsBox');
-      const step2 = document.getElementById('step2');
-
-      step2.addEventListener('click', (e) => {
-        if (step2.classList.contains('disabled-step')) {
-          e.preventDefault();
-          alert("Please complete Step 1 (Video) before accessing Step 2 (MCQ).");
-        } else {
-          window.location.href = "{{ route('trainingAssessment.mcq') }}"; 
+        function toggleMenu(header) {
+            const submenu = header.nextElementSibling;
+            const isOpen = submenu.classList.contains("open");
+            document.querySelectorAll('.submenu').forEach(menu => menu.classList.remove('open'));
+            document.querySelectorAll('.menu-section h3').forEach(menuHeader => menuHeader.classList.remove('active'));
+            if (!isOpen) {
+                submenu.classList.add("open");
+                header.classList.add("active");
+            }
         }
-      });
 
-      video.addEventListener('ended', () => {
-        congrats.style.display = 'block';
-        step2.classList.remove('disabled-step');
-        step2.classList.add('active-step');
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-      });
+        function toggleDropdown(trigger) {
+            const container = trigger.nextElementSibling;
+            const isOpen = container.classList.contains("open");
+            trigger.parentElement.parentElement.querySelectorAll(".dropdown-container").forEach(drop => drop.classList
+                .remove("open"));
+            trigger.parentElement.parentElement.querySelectorAll(".dropdown-btn").forEach(btn => btn.classList.remove(
+                "active"));
+            if (!isOpen) {
+                container.classList.add("open");
+                trigger.classList.add("active");
+            }
+        }
+
+        const video = document.getElementById('trainingVideo');
+        const congrats = document.getElementById('congratsBox');
+        const step2 = document.getElementById('step2');
+
+        step2.addEventListener('click', (e) => {
+            if (step2.classList.contains('disabled-step')) {
+                e.preventDefault();
+                alert("Please complete Step 1 (Video) before accessing Step 2 (MCQ).");
+            } else {
+                window.location.href = "{{ route('trainingAssessment.mcq') }}";
+            }
+        });
+
+        video.addEventListener('ended', () => {
+            congrats.style.display = 'block';
+            step2.classList.remove('disabled-step');
+            step2.classList.add('active-step');
+            window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: 'smooth'
+            });
+        });
         const modal = document.getElementById('addModuleModal');
         const openBtn = document.getElementById('openAddModule');
         const closeBtn = document.getElementById('closeModal');

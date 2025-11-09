@@ -2,480 +2,590 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Training Module | HR Management</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-  <meta name="csrf-token" content="{{ csrf_token() }}">
-  <style>
-    .add-module-btn {
-      background: #2563eb;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 8px 16px;
-      font-size: 15px;
-      cursor: pointer;
-      margin-bottom: 15px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: background 0.3s;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Training Module | HR Management</title>
 
-    .add-module-btn:hover {
-      background: #1d4ed8;
-    }
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 
-    .add-mcq-btn {
-      background: #10b981;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 8px 16px;
-      font-size: 15px;
-      cursor: pointer;
-      margin-top: 10px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: background 0.3s;
-    }
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #d1fae5;
+            --success-text: #047857;
+            --danger: #fee2e2;
+            --danger-text: #b91c1c;
+            --warning: #fbbf24;
+            --gray-100: #f9fafb;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #666;
+            --text: #111827;
+        }
 
-    .add-mcq-btn:hover {
-      background: #059669;
-    }
+        body {
+            font-family: Arial, sans-serif;
+            background: var(--gray-100);
+            margin: 0;
+            color: var(--text);
+        }
 
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      justify-content: center;
-      align-items: center;
-    }
+        .main-content2 {
+            padding: 30px;
+        }
 
-    .modal-content {
-      background: #fff;
-      padding: 25px;
-      border-radius: 10px;
-      width: 400px;
-      max-width: 90%;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      position: relative;
-    }
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
 
-    .modal-content h3 {
-      margin-top: 0;
-      color: #111827;
-    }
+        .add-module-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
 
-    .modal-content label {
-      font-weight: bold;
-      display: block;
-      margin: 10px 0 5px;
-    }
+        .add-module-btn:hover {
+            background: var(--primary-dark);
+        }
 
-    .modal-content input,
-    .modal-content textarea,
-    .modal-content select {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
+        .video-container {
+            margin: 15px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
 
-    .save-btn {
-      background: #2563eb;
-      color: white;
-      padding: 8px 14px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
+        .video-container video {
+            width: 100%;
+            display: block;
+        }
 
-    .close-btn {
-      background: #9ca3af;
-      color: white;
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      border: none;
-      padding: 5px 8px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
+        .module-details p {
+            margin: 8px 0;
+            font-size: 15px;
+        }
 
-    .mcq-section {
-      background: #f9fafb;
-      border-radius: 10px;
-      padding: 20px;
-      margin-top: 30px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    }
+        .status-btn {
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-weight: 600;
+            cursor: pointer;
+            min-width: 80px;
+        }
 
-    .mcq-section h3 {
-      margin-top: 0;
-      color: #1f2937;
-    }
+        .status-active {
+            background: var(--success);
+            color: var(--success-text);
+        }
 
-  .modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    justify-content: center;
-    align-items: center;
-    z-index: 999;
-  }
-  .modal-content {
-    background: #fff;
-    padding: 20px 25px;
-    border-radius: 12px;
-    width: 95%;
-    max-width: 700px;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    animation: fadeIn 0.3s ease;
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .close-btn {
-    position: absolute;
-    top: 12px;
-    right: 15px;
-    background: transparent;
-    border: none;
-    font-size: 1.4rem;
-    cursor: pointer;
-  }
-  h2 { margin-bottom: 15px; color: #333; }
-  .mcq-block {
-    border: 1px solid #ddd;
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    background: #fafafa;
-  }
-  .mcq-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .remove-btn {
-    border: none;
-    background: #ffdddd;
-    color: #a00;
-    border-radius: 50%;
-    width: 28px;
-    height: 28px;
-    cursor: pointer;
-  }
-  label { display: block; margin-top: 8px; font-weight: 600; }
-  textarea, input, select {
-    width: 100%;
-    padding: 7px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    margin-top: 3px;
-  }
-  .options-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-  .btn-group {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 15px;
-  }
-  .add-btn, .save-btn {
-    padding: 10px 16px;
-    border: none;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-  }
-  .add-btn { background: #e0f7ff; color: #0077b6; }
-  .save-btn { background: #0077b6; color: white; }
+        .status-inactive {
+            background: var(--danger);
+            color: var(--danger-text);
+        }
 
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
 
+        th,
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--gray-200);
+            text-align: left;
+        }
 
-  </style>
+        th {
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: var(--gray-100);
+        }
+
+        .action-btn {
+            border: none;
+            border-radius: 6px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 0 3px;
+        }
+
+        .edit-btn {
+            background: var(--warning);
+            color: white;
+        }
+
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modern-modal {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            width: 95%;
+            max-width: 600px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray-600);
+        }
+
+        .close-btn:hover {
+            color: #000;
+        }
+
+        .modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--gray-300);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .cancel-btn,
+        .save-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .cancel-btn {
+            background: var(--gray-200);
+            color: #374151;
+        }
+
+        .save-btn {
+            background: var(--primary);
+            color: white;
+        }
+    </style>
 </head>
 
 <body>
-  @include('hrms::partials.sidebar')
 
-  <div class="main-content2">
-    <div class="top-bar">
-      <div>Training Module</div>
-      <div>Admin <button class="logout-btn">Logout</button></div>
-    </div>
+    @include('hrms::partials.sidebar')
 
-    <div class="training-container">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h2>
-          @if($latestModule)
-            Training Module: {{ $latestModule->title }}
-          @else
-            No Training Module Available
-          @endif
-        </h2>
-
-        <button class="add-module-btn" id="openAddModule">
-          <i class="fa fa-plus"></i> Add Module
-        </button>
-      </div>
-
-      @if($latestModule)
-        <video id="trainingVideo" controls>
-          <source src="{{ $latestModule->video_path }}" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-
-        <div class="module-details">
-          <div class="module-box">
-            <strong>Module Description</strong>
-            <p>{{ $latestModule->description }}</p>
-          </div>
-          <div class="module-box">
-            <strong>Duration</strong>
-            <p>{{ $latestModule->duration ?? 'N/A' }}</p>
-          </div>
-          <div class="module-box">
-            <strong>Status</strong>
-            <p>{{ $latestModule->is_active ? 'Active' : 'Inactive' }}</p>
-          </div>
+    <div class="main-content2">
+        <div class="page-header">
+            <h2>Training Module</h2>
+            <button class="add-module-btn" id="openAddModule">
+                <i class="fa fa-plus"></i> Add Module
+            </button>
         </div>
-      @else
-        <p style="margin-top: 20px;">No training module uploaded yet.</p>
-      @endif
+
+        @if ($latestModule)
+            <div class="video-container">
+                <video id="trainingVideo" controls>
+                    <source src="{{ $latestModule->video_path }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+
+            <div class="module-details">
+                <p><strong>Module Description:</strong> {{ $latestModule->description }}</p>
+                <p><strong>Duration:</strong> {{ $latestModule->duration ?? 'N/A' }}</p>
+                <p><strong>Status:</strong>
+                    <button
+                        class="status-btn status-toggle-btn {{ $latestModule->is_active ? 'status-active' : 'status-inactive' }}"
+                        data-id="{{ $latestModule->id }}"
+                        data-status="{{ $latestModule->is_active ? 'active' : 'inactive' }}">
+                        {{ $latestModule->is_active ? 'Active' : 'Inactive' }}
+                    </button>
+                </p>
+            </div>
+        @else
+            <p style="margin-top:20px; color: #6b7280;">No training module uploaded yet.</p>
+        @endif
+
+        <!-- All Modules Table -->
+        <h3 style="margin-top: 40px;">All Training Modules</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Duration</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="moduleList">
+                @forelse($allModules as $index => $module)
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $module->title }}</td>
+                        <td>{{ Str::limit($module->description, 40) }}</td>
+                        <td>{{ $module->duration ?? 'N/A' }}</td>
+                        <td>
+                            <button
+                                class="status-btn status-toggle-btn {{ $module->is_active ? 'status-active' : 'status-inactive' }}"
+                                data-id="{{ $module->id }}"
+                                data-status="{{ $module->is_active ? 'active' : 'inactive' }}">
+                                {{ $module->is_active ? 'Active' : 'Inactive' }}
+                            </button>
+                        </td>
+                        <td>
+                            <button class="action-btn edit-btn" onclick="editModule({{ $module->id }})"
+                                title="Edit">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="deleteModule({{ $module->id }})"
+                                title="Delete">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" style="text-align:center; color:#6b7280; padding:20px;">No modules found.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
 
-    <!-- ✅ Separate MCQ Section -->
-    <div class="mcq-section">
-      <h3>MCQ Section</h3>
-      <p>Add or manage MCQs related to this training module.</p>
-      <button class="add-mcq-btn" id="openAddMcq">
-        <i class="fa fa-question-circle"></i> Add MCQ
-      </button>
-    </div>
-  </div>
+    <!-- Add/Edit Modal -->
+    <div id="addModuleModal" class="modal">
+        <div class="modern-modal">
+            <button type="button" class="close-btn" id="closeModal">×</button>
+            <h2 id="modalTitle">Add Training Module</h2>
 
-  <!-- Add Module Modal -->
-  <div id="addModuleModal" class="modal">
-    <div class="modal-content">
-      <button class="close-btn" id="closeModal">X</button>
-      <h3>Add New Training Module</h3>
-      <form id="addModuleForm" enctype="multipart/form-data">
-        @csrf
+            <form id="addModuleForm" enctype="multipart/form-data" class="modal-form">
+                @csrf
+                <input type="hidden" name="module_id" id="module_id">
 
-        <label>Module Title</label>
-        <input type="text" name="title" required>
+                <div class="form-group">
+                    <label for="module_title">Title <span style="color:red;">*</span></label>
+                    <input type="text" name="title" id="module_title" required placeholder="Enter module title">
+                </div>
 
-        <label>Description</label>
-        <textarea name="description" rows="3" required></textarea>
+                <div class="form-group">
+                    <label for="module_description">Description <span style="color:red;">*</span></label>
+                    <textarea name="description" id="module_description" rows="3" required placeholder="Describe the module"></textarea>
+                </div>
 
-        <label>Duration</label>
-        <input type="text" name="duration" placeholder="e.g. 10 min">
+                <div class="form-group">
+                    <label for="module_duration">Duration</label>
+                    <input type="text" name="duration" id="module_duration" placeholder="e.g. 10 min">
+                </div>
 
-        <label>Status</label>
-        <select name="is_active">
-          <option value="1" selected>Active</option>
-          <option value="0">Inactive</option>
-        </select>
+                <div class="form-group">
+                    <label for="module_video">Video (MP4/WebM)</label>
+                    <input type="file" name="video_file" id="module_video" accept="video/mp4,video/webm">
+                </div>
 
-        <label>Upload Video</label>
-        <input type="file" name="video_file" accept="video/mp4,video/webm" required>
-
-        <button type="submit" class="save-btn">Save Module</button>
-      </form>
-    </div>
-  </div>
-
- <!-- ✅ Add Multiple MCQs Modal -->
-<!-- ✅ Add Multiple MCQs Modal -->
-<div id="addMcqModal" class="modal">
-  <div class="modal-content">
-    <button class="close-btn" id="closeMcqModal" aria-label="Close">&times;</button>
-    <h2>Add Multiple MCQs</h2>
-
-    <form id="addMcqForm">
-      @csrf
-
-      <!-- 🆕 Assessment Name Input -->
-      
-      <div id="mcqGroup" style="
-    margin-bottom: 10px;
-">
-      <label>Assessment Name</label>
-      <input type="text" name="assessment_name" placeholder="e.g. Communication Skills Test">
-      </div>
-
-      <div id="mcqGroup">
-        <!-- Default MCQ Block -->
-        <div class="mcq-block">
-          <div class="mcq-header">
-            <h4>Question <span class="q-index">1</span></h4>
-            <button type="button" class="remove-btn" onclick="removeMcq(this)" title="Remove this question">&times;</button>
-          </div>
-
-          <label>Question</label>
-          <textarea name="questions[0][question]" rows="2" required></textarea>
-
-          <div class="options-grid">
-            <div>
-              <label>Option A</label>
-              <input type="text" name="questions[0][option_a]" required>
-            </div>
-            <div>
-              <label>Option B</label>
-              <input type="text" name="questions[0][option_b]" required>
-            </div>
-            <div>
-              <label>Option C</label>
-              <input type="text" name="questions[0][option_c]" required>
-            </div>
-            <div>
-              <label>Option D</label>
-              <input type="text" name="questions[0][option_d]" required>
-            </div>
-          </div>
-
-          <label>Correct Option</label>
-          <select name="questions[0][correct_option]" required>
-            <option value="">Select Correct Option</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
-          </select>
+                <div class="modal-actions">
+                    <button type="button" id="cancelModal" class="cancel-btn">Cancel</button>
+                    <button type="submit" class="save-btn">Save Module</button>
+                </div>
+            </form>
         </div>
-      </div>
+    </div>
+    <script>
+        // Sidebar toggle
+        function toggleMenu(header) {
+            const submenu = header.nextElementSibling;
+            const isOpen = submenu.classList.contains("open");
+            document.querySelectorAll('.submenu').forEach(menu => menu.classList.remove('open'));
+            document.querySelectorAll('.menu-section h3').forEach(menuHeader => menuHeader.classList.remove('active'));
+            if (!isOpen) {
+                submenu.classList.add("open");
+                header.classList.add("active");
+            }
+        }
 
-      <div class="btn-group">
-        <button type="button" id="addMoreMcq" class="add-btn">+ Add Another Question</button>
-        <button type="submit" class="save-btn">💾 Save All Questions</button>
-      </div>
-    </form>
-  </div>
-</div>
+        function toggleDropdown(trigger) {
+            const container = trigger.nextElementSibling;
+            const isOpen = container.classList.contains("open");
+            trigger.parentElement.parentElement.querySelectorAll(".dropdown-container").forEach(drop => drop.classList
+                .remove("open"));
+            trigger.parentElement.parentElement.querySelectorAll(".dropdown-btn").forEach(btn => btn.classList.remove(
+                "active"));
+            if (!isOpen) {
+                container.classList.add("open");
+                trigger.classList.add("active");
+            }
+        }
 
+        /* ==============================================================
+           1. GLOBAL ELEMENTS & HELPERS
+           ============================================================== */
+        const modal = document.getElementById('addModuleModal');
+        const openBtn = document.getElementById('openAddModule');
+        const closeBtn = document.getElementById('closeModal');
+        const cancelBtn = document.getElementById('cancelModal');
+        const form = document.getElementById('addModuleForm');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
-  <script>
-    
-// Sidebar toggle
-function toggleMenu(header) {
-  const submenu = header.nextElementSibling;
-  const isOpen = submenu.classList.contains("open");
-  document.querySelectorAll('.submenu').forEach(menu => menu.classList.remove('open'));
-  document.querySelectorAll('.menu-section h3').forEach(menuHeader => menuHeader.classList.remove('active'));
-  if(!isOpen){ submenu.classList.add("open"); header.classList.add("active"); }
-}
-function toggleDropdown(trigger) {
-  const container = trigger.nextElementSibling;
-  const isOpen = container.classList.contains("open");
-  trigger.parentElement.parentElement.querySelectorAll(".dropdown-container").forEach(drop => drop.classList.remove("open"));
-  trigger.parentElement.parentElement.querySelectorAll(".dropdown-btn").forEach(btn => btn.classList.remove("active"));
-  if(!isOpen){ container.classList.add("open"); trigger.classList.add("active"); }
-}
-    const moduleModal = document.getElementById('addModuleModal');
-    const mcqModal = document.getElementById('addMcqModal');
-    const openModuleBtn = document.getElementById('openAddModule');
-    const closeModuleBtn = document.getElementById('closeModal');
-    const openMcqBtn = document.getElementById('openAddMcq');
-    const closeMcqBtn = document.getElementById('closeMcqModal');
+        let alertActive = false;
+        const showAlert = (msg) => {
+            if (alertActive) return;
+            alertActive = true;
+            alert(msg);
+            setTimeout(() => alertActive = false, 800);
+        };
 
-    openModuleBtn.onclick = () => moduleModal.style.display = 'flex';
-    closeModuleBtn.onclick = () => moduleModal.style.display = 'none';
-    openMcqBtn.onclick = () => mcqModal.style.display = 'flex';
-    closeMcqBtn.onclick = () => mcqModal.style.display = 'none';
+        /* ==============================================================
+           2. MODAL – OPEN / CLOSE
+           ============================================================== */
+        openBtn.addEventListener('click', () => {
+            document.getElementById('modalTitle').textContent = 'Add Training Module';
+            form.reset();
+            document.getElementById('module_id').value = '';
+            modal.style.display = 'flex';
+        });
 
-    window.onclick = (e) => {
-      if (e.target === moduleModal) moduleModal.style.display = 'none';
-      if (e.target === mcqModal) mcqModal.style.display = 'none';
-    }
+        const closeModal = () => {
+            modal.style.display = 'none';
+            form.reset();
+        };
+        closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+        window.addEventListener('click', e => {
+            if (e.target === modal) closeModal();
+        });
 
-    // Upload module logic
-    document.getElementById('addModuleForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        /* ==============================================================
+           3. EDIT MODULE
+           ============================================================== */
+        window.editModule = async (id) => {
+            try {
+                const res = await fetch(`/hrms/training/get/${id}`);
+                const data = await res.json();
 
-      const response = await fetch("{{ route('training.addModule') }}", {
-        method: "POST",
-        headers: { 'X-CSRF-TOKEN': csrfToken },
-        body: formData
-      });
-      const result = await response.json();
-      if (result.success) {
-        alert("Module uploaded successfully!");
-        location.reload();
-      }
-    });
+                document.getElementById('modalTitle').textContent = 'Edit Training Module';
+                document.getElementById('module_id').value = data.id;
+                document.getElementById('module_title').value = data.title;
+                document.getElementById('module_description').value = data.description;
+                document.getElementById('module_duration').value = data.duration || '';
+                modal.style.display = 'flex';
+            } catch {
+                showAlert('Failed to load module data.');
+            }
+        };
 
-    // Add MCQ logic
-    document.getElementById('addMcqForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+        /* ==============================================================
+           4. DELETE MODULE
+           ============================================================== */
+        window.deleteModule = async (id) => {
+            if (!confirm('Are you sure you want to delete this module?')) return;
 
-      const response = await fetch("{{ route('training.addMcq') }}", {
-        method: "POST",
-        headers: { 'X-CSRF-TOKEN': csrfToken },
-        body: formData
-      });
+            try {
+                const res = await fetch(`/hrms/training/delete/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+                const result = await res.json();
 
-      const result = await response.json();
-      if (result.success) {
-        alert("MCQ added successfully!");
-        mcqModal.style.display = 'none';
-        e.target.reset();
-      }
-    });
-     let mcqCount = 1;
+                showAlert(result.success ? 'Module deleted!' : 'Delete failed.');
+                if (result.success) setTimeout(() => location.reload(), 1000);
+            } catch {
+                showAlert('Error deleting module.');
+            }
+        };
 
-  document.getElementById('addMoreMcq').addEventListener('click', () => {
-    const mcqGroup = document.getElementById('mcqGroup');
-    const newBlock = mcqGroup.firstElementChild.cloneNode(true);
+        /* ==============================================================
+           5. ADD / EDIT FORM SUBMIT
+           ============================================================== */
+        form.addEventListener('submit', async e => {
+            e.preventDefault();
+            const fd = new FormData(form);
+            const isEdit = !!fd.get('module_id');
+            const url = isEdit ?
+                `/hrms/training/update/${fd.get('module_id')}` :
+                `{{ route('training.addModule') }}`;
 
-    newBlock.querySelectorAll('textarea, input').forEach(el => el.value = '');
-    newBlock.querySelectorAll('select').forEach(el => el.value = '');
-    
-    newBlock.querySelectorAll('[name]').forEach(el => {
-      el.name = el.name.replace(/\[\d+\]/, `[${mcqCount}]`);
-    });
-    newBlock.querySelector('.q-index').textContent = mcqCount + 1;
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: fd
+                });
+                const result = await res.json();
 
-    mcqGroup.appendChild(newBlock);
-    mcqCount++;
-  });
+                showAlert(result.success ? 'Module saved!' : 'Save failed.');
+                if (result.success) setTimeout(() => location.reload(), 1000);
+            } catch {
+                showAlert('Error saving module.');
+            }
+        });
 
-  function removeMcq(btn) {
-    const mcqBlocks = document.querySelectorAll('.mcq-block');
-    if (mcqBlocks.length > 1) {
-      btn.closest('.mcq-block').remove();
-    } else {
-      alert("At least one question is required.");
-    }
-  }
+        /* ==============================================================
+           6. STATUS TOGGLE – ONLY ONE ACTIVE MODULE
+               (works for every .status-toggle-btn on the page)
+           ============================================================== */
+        document.addEventListener('click', async e => {
+            const btn = e.target.closest('.status-toggle-btn');
+            if (!btn) return;
 
-  // Modal Logic (Optional)
-  const modal = document.getElementById('addMcqModal');
-  const closeModal = document.getElementById('closeMcqModal');
-  closeModal.onclick = () => modal.style.display = 'none';
-  window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
-  </script>
+            // -----------------------------------------------------------------
+            // Prevent double-click while request is in progress
+            // -----------------------------------------------------------------
+            if (btn.disabled) return;
+            btn.disabled = true;
+
+            const moduleId = btn.dataset.id; // id of the clicked row
+            const curStatus = btn.dataset.status; // "active" | "inactive"
+            const willBeActive = curStatus !== 'active'; // true → we want to activate
+
+            try {
+                // -------------------------------------------------------------
+                // 1. Call the toggle endpoint – it returns the *new* status
+                // -------------------------------------------------------------
+                const res = await fetch(`/hrms/training-module/toggle/${moduleId}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: willBeActive ? 'active' : 'inactive'
+                    })
+                });
+
+                const result = await res.json();
+                if (!result.success) throw new Error(result.message || 'Toggle failed');
+
+                // -------------------------------------------------------------
+                // 2. UI UPDATE – ONLY ONE ACTIVE BUTTON
+                // -------------------------------------------------------------
+                const allButtons = document.querySelectorAll('.status-toggle-btn');
+
+                // If we are activating a module → turn **all** others off
+                if (willBeActive) {
+                    allButtons.forEach(b => {
+                        b.textContent = 'Inactive';
+                        b.dataset.status = 'inactive';
+                        b.classList.remove('status-active');
+                        b.classList.add('status-inactive');
+                    });
+                }
+
+                // Set the clicked button to the new state
+                btn.textContent = willBeActive ? 'Active' : 'Inactive';
+                btn.dataset.status = willBeActive ? 'active' : 'inactive';
+                btn.classList.toggle('status-active', willBeActive);
+                btn.classList.toggle('status-inactive', !willBeActive);
+
+                // -------------------------------------------------------------
+                // 3. Sync the “latest-module” block (video area) – it also has a button
+                // -------------------------------------------------------------
+                const latestBtn = document.querySelector('.module-details .status-toggle-btn');
+                if (latestBtn && latestBtn.dataset.id == moduleId) {
+                    latestBtn.textContent = btn.textContent;
+                    latestBtn.dataset.status = btn.dataset.status;
+                    latestBtn.classList.remove('status-active', 'status-inactive');
+                    latestBtn.classList.add(willBeActive ? 'status-active' : 'status-inactive');
+                }
+
+                showAlert('Status updated!');
+
+            } catch (err) {
+                console.error(err);
+                showAlert(err.message || 'Error updating status.');
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    </script>
+
 </body>
+
 </html>

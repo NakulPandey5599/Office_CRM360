@@ -17,7 +17,7 @@
       <div class="dropdown-btn" onclick="toggleDropdown(this)"><i class="fas fa-user-plus"></i> Employee Management <span class="arrow">▶</span></div>
       <div class="dropdown-container">
         <a href="{{ route('recruitment.index') }}"><i class="fas fa-pen"></i> Candidate Registration</a>
-        <a href="{{ route('preJoiningProcess.index') }}"><i class="fas fa-user-check"></i> Pre-Joining Process</a>
+        <a href="{{ route('preJoiningProcess.listing') }}"><i class="fas fa-user-check"></i> Pre-Joining candidates</a>
         <a href="{{ route('dataVerification.index') }}"><i class="fas fa-id-card"></i> Data Verification</a>
       </div>
     </li>
@@ -30,7 +30,9 @@
     </li>
     <li><a href="{{ route('trainingAssessment.index') }}"><i class="fas fa-chalkboard-teacher"></i> Training & Assessment</a></li>
 
-    <li><a href="{{ route('training.createModule') }}"><i class="fas fa-chalkboard-teacher"></i> Add Training & Assessment</a></li>
+    <li><a href="{{ route('training.createModule') }}"><i class="fas fa-chalkboard-teacher"></i> Add Training Modules</a></li>
+    <li><a href="{{ route('training.createAssessment') }}"><i class="fas fa-chalkboard-teacher"></i> Add Training Assessment</a></li>
+
 
     
     <li><a href="{{ route('report.index') }}"><i class="fas fa-chart-bar"></i> Reports</a></li>

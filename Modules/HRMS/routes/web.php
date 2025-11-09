@@ -56,6 +56,8 @@ Route::get('/candidate/logout', [CandidateAuthController::class, 'logout'])->nam
   Route::get('hrms/pre-joining-process/experienced', [PreJoiningProcessController::class, 'experienced'])->name('preJoiningProcess.experienced');
   Route::get('hrms/pre-joining-process/fresher', [PreJoiningProcessController::class, 'fresher'])->name('preJoiningProcess.fresher');
   Route::post('hrms/pre-joining-process/store', [PreJoiningProcessController::class, 'store'])->name('preJoiningProcess.store');
+  Route::get('hrms/pre-joining-process/listing', [PreJoiningProcessController::class, 'listing'])->name('preJoiningProcess.listing');
+
 
   // Data Verification Routes
   Route::get('hrms/data-verification', [DataVerificationController::class, 'index'])->name('dataVerification.index');
@@ -86,12 +88,28 @@ Route::get('/candidate/logout', [CandidateAuthController::class, 'logout'])->nam
   Route::post('/hrms/joining-letter/download', [JoiningLetterController::class, 'downloadPDF'])->name('hrms.joining.download');
 
   Route::post('hrms/training/add-module', [TrainingAssessmentController::class, 'store'])->name('training.addModule');
-  Route::get('hrms/training/create-module', [TrainingAssessmentController::class, 'create'])->name('training.createModule');
-  Route::post('hrms/training/create-mcq', [TrainingAssessmentController::class, 'addMcq'])->name('training.addMcq');
-
+  Route::get('hrms/training/create-module', [TrainingAssessmentController::class, 'createModule'])->name('training.createModule');
+  Route::get('/hrms/training/get/{id}', [TrainingAssessmentController::class, 'getModule']);
+  Route::post('/hrms/training/update/{id}', [TrainingAssessmentController::class, 'updateModule']);
+  Route::delete('/hrms/training/delete/{id}', [TrainingAssessmentController::class, 'deleteModule']);
+  Route::get('hrms/training/create-assessment', [TrainingAssessmentController::class, 'createAssessment'])->name('training.createAssessment');
+  Route::post('/hrms/training-assessment/mcq/add', [TrainingAssessmentController::class, 'addMcq'])->name('training.addMcq');
   Route::get('/hrms/training-assessment', [TrainingAssessmentController::class, 'index'])->name('trainingAssessment.index');
   Route::get('/hrms/training-assessment/mcq', [TrainingAssessmentController::class, 'mcq'])->name('trainingAssessment.mcq');
   Route::post('/training/submit', [TrainingAssessmentController::class, 'storeAnswers'])->name('training.storeAnswers');
+  Route::delete('/hrms/training-assessment/mcq/delete/{id}', [TrainingAssessmentController::class, 'deleteMcq'])->name('training.deleteMcq');
+  Route::get('/hrms/training-assessment/mcq/get/{id}', [TrainingAssessmentController::class, 'getMcq'])->name('training.getMcq');
+  Route::post('/hrms/training-assessment/mcq/update/{id}', [TrainingAssessmentController::class, 'updateMcq'])->name('training.updateMcq');
+  Route::post('/hrms/training-assessment/mcq/toggle/{id}', [TrainingAssessmentController::class, 'toggleStatus'])->name('training.toggleStatus');
+  // Route::post('hrms/training-module/status/{id}', [TrainingAssessmentController::class, 'toggleStatusModules'])->name('training.toggleStatusModules');
+  Route::post('hrms/training-module/toggle/{id}', [TrainingAssessmentController::class, 'toggleStatusModules'])->name('training.toggle');
+
+
+
+
+
+
+
 
 
   Route::get('/hrms/report', [ReportController::class, 'index'])->name('report.index'); 

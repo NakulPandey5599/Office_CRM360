@@ -25,6 +25,9 @@
 
     <p>We welcome you to our organization and look forward to your valuable contribution.</p>
 
+    <p style="margin-top:10px;">Click below to access your personalized training portal 👇</p>
+     <a href="{{ route('trainingAssessment.index') }}" class="btn" target="_blank">Access Training Modules</a>
+
     <br><br>
     <p>Regards,<br>
         <strong>HR Department</strong><br>
