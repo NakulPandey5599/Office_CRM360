@@ -365,6 +365,13 @@
                     <label for="module_video">Video (MP4/WebM)</label>
                     <input type="file" name="video_file" id="module_video" accept="video/mp4,video/webm">
                 </div>
+                <div class="form-group">
+    <label for="module_status">Status <span style="color:red;">*</span></label>
+    <select name="is_active" id="module_status" required>
+        <option value="0">Inactive</option>
+        <option value="1">Active</option>
+    </select>
+</div>
 
                 <div class="modal-actions">
                     <button type="button" id="cancelModal" class="cancel-btn">Cancel</button>
@@ -450,6 +457,8 @@
                 document.getElementById('module_title').value = data.title;
                 document.getElementById('module_description').value = data.description;
                 document.getElementById('module_duration').value = data.duration || '';
+                document.getElementById('module_status').value = data.is_active ? 1 : 0;
+
                 modal.style.display = 'flex';
             } catch {
                 showAlert('Failed to load module data.');

@@ -215,4 +215,14 @@ if ($request->hasFile('receiving_letter')) {
 
         return response()->json($results);
     }
+
+    public function listing()
+{
+    // Fetch all pre-joining employees
+    $employees = \Modules\HRMS\Models\PreJoiningEmployee::latest()->get();
+
+    // Pass to a view
+    return view('hrms::preJoiningProcess.listing', compact('employees'));
+}
+
 }

@@ -99,41 +99,53 @@ public function mcq()
         return response()->json(['success' => true, 'message' => 'Result stored successfully!']);
     }
 
-    public function store(Request $request)
-      {
-        try {
-            $validated = $request->validate([
-                'title' => 'required|string|max:255',
-                'description' => 'required|string',
-                'video_file' => 'required|mimes:mp4,webm|max:20480', // 20MB limit
-                'duration' => 'nullable|string|max:50',
-                'is_active' => 'nullable|boolean',
-            ]);
+public function store(Request $request)
+{
+    try {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'video_file' => 'nullable|mimes:mp4,webm|max:20480', // allow nullable for flexibility
+            'duration' => 'nullable|string|max:50',
+            'is_active' => 'nullable|in:0,1',
+        ]);
 
+        // Normalize is_active to integer 0/1
+        $isActive = (int) $request->input('is_active', 0);
+
+        // If this module is set active, deactivate all others first
+        if ($isActive === 1) {
+            TrainingModule::where('is_active', 1)->update(['is_active' => 0]);
+        }
+
+        $videoPath = null;
+        if ($request->hasFile('video_file')) {
             // Save uploaded file to public storage
             $videoPath = $request->file('video_file')->store('training_videos', 'public');
-
-            // Store in DB
-            $module = TrainingModule::create([
-                'title' => $validated['title'],
-                'description' => $validated['description'],
-                'video_path' => '/storage/' . $videoPath,
-                'duration' => $request->duration ?? 'N/A',
-                'is_active' => $request->is_active ?? true,
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'module' => $module
-            ]);
-        } catch (\Throwable $th) {
-            Log::error('Training Module Upload Error: ' . $th->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => $th->getMessage()
-            ], 500);
+            $videoPath = '/storage/' . $videoPath;
         }
+
+        // Store in DB
+        $module = TrainingModule::create([
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'video_path' => $videoPath ?? null,
+            'duration' => $request->duration ?? 'N/A',
+            'is_active' => $isActive,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'module' => $module
+        ]);
+    } catch (\Throwable $th) {
+        Log::error('Training Module Upload Error: ' . $th->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => $th->getMessage()
+        ], 500);
     }
+}
 
     public function addMcq(Request $request)
     {
@@ -236,20 +248,39 @@ public function mcq()
         return response()->json(TrainingModule::find($id));
     }
 
-    public function updateModule(Request $request, $id)
-    {
-        $module = TrainingModule::findOrFail($id);
-        $module->title = $request->title;
-        $module->description = $request->description;
-        $module->duration = $request->duration;
-        $module->is_active = $request->is_active;
-        if ($request->hasFile('video_file')) {
-            $path = $request->file('video_file')->store('training_videos', 'public');
-            $module->video_path = '/storage/' . $path;
-        }
-        $module->save();
-        return response()->json(['success' => true]);
+public function updateModule(Request $request, $id)
+{
+    $module = TrainingModule::findOrFail($id);
+
+    $validated = $request->validate([
+        'title' => 'required|string|max:255',
+        'description' => 'required|string',
+        'duration' => 'nullable|string|max:50',
+        'video_file' => 'nullable|mimes:mp4,webm|max:20480',
+        'is_active' => 'nullable|in:0,1',
+    ]);
+
+    $module->title = $validated['title'];
+    $module->description = $validated['description'];
+    $module->duration = $validated['duration'] ?? $module->duration;
+
+    $isActive = (int) $request->input('is_active', 0);
+    $module->is_active = $isActive;
+
+    // If making this module active, deactivate all other modules
+    if ($isActive === 1) {
+        TrainingModule::where('id', '!=', $module->id)->update(['is_active' => 0]);
     }
+
+    if ($request->hasFile('video_file')) {
+        $path = $request->file('video_file')->store('training_videos', 'public');
+        $module->video_path = '/storage/' . $path;
+    }
+
+    $module->save();
+
+    return response()->json(['success' => true]);
+}
 
     public function deleteModule($id)
     {
@@ -271,38 +302,36 @@ public function mcq()
         ]);
     }
 
-    public function toggleStatusModules(Request $request, $id)
-    {
-        try {
-            $module = TrainingModule::find($id);
+public function toggleStatusModules($id)
+{
+    try {
+        // Find the module
+        $module = TrainingModule::findOrFail($id);
 
-            if (!$module) {
-                return response()->json(['success' => false, 'message' => 'Module not found']);
-            }
-
-            $status = $request->input('status');
-
-            // Ensure only one active at a time
-            if ($status === 'active') {
-                TrainingModule::query()->update(['is_active' => false]);
-                $module->is_active = true;
-            } else {
-                $module->is_active = false;
-            }
-
-            $module->save();
-
-            return response()->json([
-                'success' => true,
-                'new_status' => $status,
-                'message' => 'Status updated successfully'
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Toggle status failed: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Server error: ' . $e->getMessage()
-            ], 500);
+        // If activating this module
+        if (!$module->is_active) {
+            // Deactivate all others
+            TrainingModule::where('id', '!=', $id)->update(['is_active' => 0]);
+            $module->is_active = 1;
+        } else {
+            // Deactivate current module
+            $module->is_active = 0;
         }
+
+        $module->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status updated successfully!',
+            'is_active' => $module->is_active
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Something went wrong!',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
+
 }

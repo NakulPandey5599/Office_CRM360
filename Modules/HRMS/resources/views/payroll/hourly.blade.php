@@ -12,7 +12,7 @@
 <body>
 
 
- @include('hrms::partials.sidebar')
+ {{-- @include('hrms::partials.sidebar') --}}
 
 <div class="main-content-uni">
   <div class="card-uni">

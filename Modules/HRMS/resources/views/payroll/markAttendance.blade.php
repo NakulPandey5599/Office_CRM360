@@ -106,7 +106,7 @@
             <button id="modal-close" type="button" style="background:none; border:none; font-size:18px;">&times;</button>
         </div>
 
-        <form id="markAttendanceForm" method="POST" action="{{ route('attendance.mark.store') }}">
+         <form id="markAttendanceForm" method="POST">
             @csrf
 
             <!-- Search Employee -->
@@ -194,6 +194,20 @@
         </form>
     </div>
 </div>
+<!-- ✅ Toast Message -->
+<div id="toastMessage"
+     style="position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            z-index: 99999;">
+</div>
 
 <!-- JS -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -244,34 +258,34 @@ $('#status').on('change', function() {
 });
 
     // 📨 Submit Attendance
-    form.on('submit', function (e) {
-        e.preventDefault();
-        errorsDiv.text('');
+//     form.on('submit', function (e) {
+//         e.preventDefault();
+//         errorsDiv.text('');
 
-        if (!$('#employee_id').val()) {
-            errorsDiv.text('Please select an employee.');
-            return;
-        }
+//         if (!$('#employee_id').val()) {
+//             errorsDiv.text('Please select an employee.');
+//             return;
+//         }
 
-        $.ajax({
-            url: form.attr('action'),
-            type: 'POST',
-            data: form.serialize(),
-            success: function (res) {
-                alert(res.success || 'Attendance saved successfully!');
-                hideModal();
-                location.reload();
-            },
-            error: function (xhr) {
-                if (xhr.responseJSON?.errors) {
-                    errorsDiv.html(Object.values(xhr.responseJSON.errors).map(e => `<div>${e}</div>`).join(''));
-                } else {
-                    errorsDiv.text(xhr.responseJSON?.message || 'Error saving attendance.');
-                }
-            }
-        });
-    });
-})();
+//         $.ajax({
+//             url: form.attr('action'),
+//             type: 'POST',
+//             data: form.serialize(),
+//             success: function (res) {
+//                 alert(res.success || 'Attendance saved successfully!');
+//                 hideModal();
+//                 location.reload();
+//             },
+//             error: function (xhr) {
+//                 if (xhr.responseJSON?.errors) {
+//                     errorsDiv.html(Object.values(xhr.responseJSON.errors).map(e => `<div>${e}</div>`).join(''));
+//                 } else {
+//                     errorsDiv.text(xhr.responseJSON?.message || 'Error saving attendance.');
+//                 }
+//             }
+//         });
+//     });
+// })();
 
 // 🔍 Search (Same behavior as Offer Letter page)
 $(document).ready(function() {
