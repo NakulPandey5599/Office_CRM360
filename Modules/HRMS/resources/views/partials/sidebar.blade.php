@@ -68,7 +68,6 @@
     <li><a href="{{ route('salaryslip.index') }}"><i class="fas fa-clipboard-list submenu-icon"></i> Salary Slip</a></li>
     <li><a href="{{ route('monthlyPayroll.index') }}"><i class="fas fa-calendar-check submenu-icon"></i> Monthly Payroll</a></li>
     <li><a href="{{ route('hourlyPayroll.index') }}"><i class="fas fa-clock submenu-icon"></i> Hourly Payroll</a></li>
-    <li><a href="{{ route('finalizedPayroll.index') }}"><i class="fas fa-file-invoice-dollar submenu-icon"></i> Finalized Payroll</a></li>
   </ul>
 </div>
 </div>

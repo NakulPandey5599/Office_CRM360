@@ -126,187 +126,206 @@ class AttendanceController extends Controller
     /**
      * 🧾 Store or Update Individual Attendance Record
      */
-    public function storeAttendance(Request $request)
-    {
+    // public function storeAttendance(Request $request)
+    // {
+    //     try {
+    //         // ✅ Validation
+    //         $validated = $request->validate([
+    //             'employee_id'         => 'required|integer',
+    //             'employee_name'       => 'required|string',
+    //             'employee_department' => 'required|string',
+    //             'date'                => 'required|date',
+    //             'status'              => 'required|string|in:Present,Absent,Leave,Half Day',
+    //             'clock_in'            => 'nullable',
+    //             'clock_out'           => 'nullable',
+    //             'is_late'             => 'nullable|boolean',
+    //             'is_half_day'         => 'nullable|boolean',
+    //             'working_from'        => 'nullable|string',
+    //             'overwrite'           => 'nullable|boolean',
+    //         ]);
+
+    //         $overwrite = $validated['overwrite'] ?? false;
+
+    //         // 🧠 Auto-handle Absent / Leave defaults
+    //         if (in_array($validated['status'], ['Absent', 'Leave'])) {
+    //             $validated['clock_in']     = null;
+    //             $validated['clock_out']    = null;
+    //             $validated['is_late']      = 0;
+    //             $validated['is_half_day']  = 0;
+    //             $validated['working_from'] = 'Other';
+    //         } else {
+    //             $validated['clock_in']     = $validated['clock_in'] ?? $request->clock_in;
+    //             $validated['clock_out']    = $validated['clock_out'] ?? $request->clock_out;
+    //             $validated['is_late']      = $validated['is_late'] ?? 0;
+    //             $validated['is_half_day']  = $validated['is_half_day'] ?? 0;
+    //             $validated['working_from'] = $validated['working_from'] ?? $request->working_from;
+    //         }
+
+    //         // 🗑️ If overwrite is enabled, remove existing entry
+    //         if ($overwrite) {
+    //             Attendance::where('employee_id', $validated['employee_id'])
+    //                 ->where('date', $validated['date'])
+    //                 ->delete();
+    //         }
+
+    //         // 💾 Save or update record
+    //         Attendance::updateOrCreate(
+    //             [
+    //                 'employee_id' => $validated['employee_id'],
+    //                 'date'        => $validated['date'],
+    //             ],
+    //             [
+    //                 'employee_name'  => $validated['employee_name'],
+    //                 'department'     => $validated['employee_department'],
+    //                 'status'         => $validated['status'],
+    //                 'clock_in'       => $validated['clock_in'],
+    //                 'clock_out'      => $validated['clock_out'],
+    //                 'is_late'        => $validated['is_late'],
+    //                 'is_half_day'    => $validated['is_half_day'],
+    //                 'working_from'   => $validated['working_from'],
+    //                 'updated_at'     => now(),
+    //                 'created_at'     => now(),
+    //             ]
+    //         );
+
+    //         return response()->json(['success' => 'Attendance saved successfully!']);
+    //     } catch (\Illuminate\Validation\ValidationException $e) {
+    //         return response()->json(['errors' => $e->errors()], 422);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => $e->getMessage()], 500);
+    //     }
+    // }
+
+
+    public function liveSave(Request $request)
+     {
         try {
-            // ✅ Validation
+
+            // VALIDATION
             $validated = $request->validate([
-                'employee_id'         => 'required|integer',
-                'employee_name'       => 'required|string',
-                'employee_department' => 'required|string',
-                'date'                => 'required|date',
-                'status'              => 'required|string|in:Present,Absent,Leave,Half Day',
-                'clock_in'            => 'nullable',
-                'clock_out'           => 'nullable',
-                'is_late'             => 'nullable|boolean',
-                'is_half_day'         => 'nullable|boolean',
-                'working_from'        => 'nullable|string',
-                'overwrite'           => 'nullable|boolean',
+                'employee_id'     => 'required|integer|exists:prejoining_employees,id',
+                'date'            => 'required|date',
+                'status'          => 'required|string|in:P,A,L',
+
+                'clock_in'        => 'nullable|string',
+                'clock_out'       => 'nullable|string',
+
+                // NEW VALIDATION FOR AM/PM
+                'clock_in_ampm'   => 'nullable|string|in:AM,PM',
+                'clock_out_ampm'  => 'nullable|string|in:AM,PM',
+
+                'is_late'         => 'nullable|in:0,1',
+                'is_half_day'     => 'nullable|in:0,1',
+                'working_from'    => 'nullable|string|max:100',
+                'leave_type'      => 'nullable|string|max:100',
+                'reason'          => 'nullable|string|max:255',
+
+                'overwrite'       => 'nullable|boolean',
             ]);
 
-            $overwrite = $validated['overwrite'] ?? false;
+            // FUNCTION - Convert Time + AM/PM → 24-Hour Format
+            $convertTo24 = function ($time, $ampm) {
+                if (!$time || !$ampm) return null;
 
-            // 🧠 Auto-handle Absent / Leave defaults
-            if (in_array($validated['status'], ['Absent', 'Leave'])) {
-                $validated['clock_in']     = null;
-                $validated['clock_out']    = null;
-                $validated['is_late']      = 0;
-                $validated['is_half_day']  = 0;
-                $validated['working_from'] = 'Other';
-            } else {
-                $validated['clock_in']     = $validated['clock_in'] ?? $request->clock_in;
-                $validated['clock_out']    = $validated['clock_out'] ?? $request->clock_out;
-                $validated['is_late']      = $validated['is_late'] ?? 0;
-                $validated['is_half_day']  = $validated['is_half_day'] ?? 0;
-                $validated['working_from'] = $validated['working_from'] ?? $request->working_from;
+                // force format "H:i AM/PM"
+                $full = $time . ' ' . $ampm;
+
+                return date("H:i", strtotime($full));
+            };
+
+
+            // FETCH EMPLOYEE
+            $employee = PreJoiningEmployee::findOrFail($validated['employee_id']);
+
+            $employeeName = trim(($employee->first_name ?? '') . ' ' . ($employee->last_name ?? ''));
+
+            $clockIn24  = $convertTo24($request->input('clock_in'),  $request->input('clock_in_ampm'));
+            $clockOut24 = $convertTo24($request->input('clock_out'), $request->input('clock_out_ampm'));
+
+
+            // DEFAULT PAYLOAD
+            $data = [
+                'clock_in'     => $clockIn24,
+                'clock_out'    => $clockOut24,
+                'is_late'      => (int) $request->input('is_late', 0),
+                'is_half_day'  => (int) $request->input('is_half_day', 0),
+                'working_from' => $request->input('working_from', 'Office'),
+                'leave_type'   => null,
+                'reason'       => null,
+            ];
+
+
+            // STATUS LOGIC
+            switch ($validated['status']) {
+
+                // ABSENT
+                case 'A':
+                    $data['clock_in'] = null;
+                    $data['clock_out'] = null;
+                    $data['is_late'] = 0;
+                    $data['is_half_day'] = 0;
+                    $data['working_from'] = 'Other';
+                    break;
+
+                // LEAVE
+                case 'L':
+                    $data['leave_type'] = $request->leave_type ?? 'Unpaid Leave';
+                    $data['reason']     = $request->reason ?? 'N/A';
+                    $data['clock_in']   = null;
+                    $data['clock_out']  = null;
+                    $data['is_late']    = 0;
+                    $data['is_half_day'] = 0;
+                    $data['working_from'] = 'Other';
+                    break;
+
+                // PRESENT
+                case 'P':
+
+                    // If user did not provide times, fill defaults (9 hours)
+                    if (!$clockIn24 || !$clockOut24) {
+                        $data['clock_in']  = now()->format('H:i');
+                        $data['clock_out'] = now()->addHours(9)->format('H:i');
+                    }
+                    break;
             }
 
-            // 🗑️ If overwrite is enabled, remove existing entry
-            if ($overwrite) {
+
+            // OVERWRITE LOGIC
+            if ($request->boolean('overwrite')) {
                 Attendance::where('employee_id', $validated['employee_id'])
                     ->where('date', $validated['date'])
                     ->delete();
             }
 
-            // 💾 Save or update record
+
+            // SAVE OR UPDATE ATTENDANCE
             Attendance::updateOrCreate(
                 [
                     'employee_id' => $validated['employee_id'],
                     'date'        => $validated['date'],
                 ],
-                [
-                    'employee_name'  => $validated['employee_name'],
-                    'department'     => $validated['employee_department'],
-                    'status'         => $validated['status'],
-                    'clock_in'       => $validated['clock_in'],
-                    'clock_out'      => $validated['clock_out'],
-                    'is_late'        => $validated['is_late'],
-                    'is_half_day'    => $validated['is_half_day'],
-                    'working_from'   => $validated['working_from'],
-                    'updated_at'     => now(),
-                    'created_at'     => now(),
-                ]
+                array_merge([
+                    'employee_name' => $employeeName,
+                    'department'    => $employee->job_profile ?? 'N/A',
+                    'status'        => $validated['status'],
+                ], $data)
             );
 
-            return response()->json(['success' => 'Attendance saved successfully!']);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['errors' => $e->errors()], 422);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-    }
-public function liveSave(Request $request)
-{
-    try {
-        // ✅ 1. Validation (expanded & consistent)
-        $validated = $request->validate([
-            'employee_id' => 'required|integer|exists:prejoining_employees,id',
-            'date'        => 'required|date',
-            'status'      => 'required|string|in:A,P,L',
-            'clock_in'     => 'nullable|string',
-            'clock_out'    => 'nullable|string',
-            'is_late'      => 'nullable|in:0,1',
-            'is_half_day'  => 'nullable|in:0,1',
-            'working_from' => 'nullable|string|max:100',
-            'leave_type'   => 'nullable|string|max:100',
-            'reason'       => 'nullable|string|max:255',
-            'overwrite'    => 'nullable|boolean',
-        ]);
 
-        // ✅ 2. Fetch employee
-        $employee = PreJoiningEmployee::find($validated['employee_id']);
-        if (!$employee) {
+            // STATUS MESSAGE
+            $message = match ($validated['status']) {
+                'P' => 'Present attendance saved!',
+                'A' => 'Absent marked successfully!',
+                'L' => 'Leave saved successfully!',
+                default => 'Attendance updated!',
+            };
+
+            return response()->json(['success' => true, 'message' => $message]);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Employee not found!',
-            ], 404);
+                'message' => $e->getMessage(),
+            ], 500);
         }
-
-        $employeeName = trim(($employee->first_name ?? '') . ' ' . ($employee->last_name ?? ''));
-
-        // ✅ 3. Define default fields
-        $defaults = [
-            'clock_in'     => $request->input('clock_in'),
-            'clock_out'    => $request->input('clock_out'),
-            'is_late'      => (int) $request->input('is_late', 0),
-            'is_half_day'  => (int) $request->input('is_half_day', 0),
-            'working_from' => $request->input('working_from', 'Office'),
-            'leave_type'   => null,
-            'reason'       => null,
-        ];
-
-        // ✅ 4. Adjust logic based on status
-        switch ($validated['status']) {
-            case 'A': // Absent
-                $defaults['clock_in'] = null;
-                $defaults['clock_out'] = null;
-                $defaults['is_late'] = 0;
-                $defaults['is_half_day'] = 0;
-                $defaults['working_from'] = 'Other';
-                break;
-
-            case 'L': // Leave
-                $defaults['working_from'] = 'Other';
-                $defaults['leave_type'] = $request->input('leave_type', 'Unpaid Leave');
-                $defaults['reason'] = $request->input('reason', 'N/A');
-                $defaults['clock_in'] = null;
-                $defaults['clock_out'] = null;
-                $defaults['is_late'] = 0;
-                $defaults['is_half_day'] = 0;
-                break;
-
-            case 'P': // Present
-                // No reset — keep manual entry (clock_in/out)
-                if (empty($defaults['clock_in']) || empty($defaults['clock_out'])) {
-                    $defaults['clock_in'] = $defaults['clock_in'] ?? now()->format('H:i');
-                    $defaults['clock_out'] = $defaults['clock_out'] ?? now()->addHours(9)->format('H:i');
-                }
-                break;
-        }
-
-        // ✅ 5. Overwrite option
-        if ($request->boolean('overwrite')) {
-            Attendance::where('employee_id', $validated['employee_id'])
-                ->where('date', $validated['date'])
-                ->delete();
-        }
-
-        // ✅ 6. Save or update record
-        Attendance::updateOrCreate(
-            [
-                'employee_id' => $validated['employee_id'],
-                'date'        => $validated['date'],
-            ],
-            array_merge([
-                'employee_name' => $employeeName,
-                'department'    => $employee->job_profile ?? 'N/A',
-                'status'        => $validated['status'],
-            ], $defaults)
-        );
-
-        // ✅ 7. Custom message per status
-        $msg = match ($validated['status']) {
-            'P' => 'Present attendance saved successfully!',
-            'A' => 'Absent marked successfully!',
-            'L' => 'Leave saved successfully!',
-            default => 'Attendance updated!',
-        };
-
-        return response()->json(['success' => true, 'message' => $msg]);
-
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json(['success' => false, 'errors' => $e->errors()], 422);
-    } catch (\Exception $e) {
-        Log::error('LiveSave Error', [
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-
-        return response()->json([
-            'success' => false,
-            'message' => $e->getMessage(),
-        ], 500);
-    }
-}
-
+     }
 }

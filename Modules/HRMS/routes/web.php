@@ -101,6 +101,8 @@ Route::get('/hrms/training-assessment/mcq/get/{id}', [TrainingAssessmentControll
 Route::post('/hrms/training-assessment/mcq/update/{id}', [TrainingAssessmentController::class, 'updateMcq'])->name('training.updateMcq');
 Route::post('/hrms/training-assessment/mcq/toggle/{id}', [TrainingAssessmentController::class, 'toggleStatus'])->name('training.toggleStatus');
 Route::post('hrms/training-module/toggle/{id}', [TrainingAssessmentController::class, 'toggleStatusModules'])->name('training.toggle');
+Route::get('hrms/training/get-active', [TrainingAssessmentController::class, 'getActiveModule']);
+
 
 // HRMS dashboard and report routes
 Route::get('/hrms/report', [ReportController::class, 'index'])->name('report.index');
@@ -108,13 +110,16 @@ Route::get('/hrms/dashboard', [DashboardController::class, 'index'])->name('dash
 
 //Payroll Routes
 Route::get('/hrms/payroll/salary-slip', [PayrollController::class, 'salarySlipIndex'])->name('salaryslip.index');
-Route::get('/hrms/payroll/salary-slip/search', [PayrollController::class, 'searchEmployeeSalarySlip'])->name('salarySlipEmployee.search');
-Route::post('/hrms/payroll/salary-slip/store', [PayrollController::class, 'salarySlipStore'])->name('salaryslip.store');
+Route::get('/hrms/payroll/salary-slip/{emp_id}', [PayrollController::class, 'salaryslipshow'])->name('salaryslip.show');
+Route::post('/hrms/payroll/salary-slip/save', [PayrollController::class, 'salaryslipstore'])->name('salaryslip.store');
 Route::get('/hrms/payroll/monthly-payroll', [PayrollController::class, 'monthlyPayroll'])->name('monthlyPayroll.index');
-Route::post('/payroll/fetch', [PayrollController::class, 'fetch'])->name('payroll.fetch');
+Route::post('/hrms/payroll/monthly-payroll/fetch', [PayrollController::class, 'fetch'])->name('payroll.fetch');
+
 
 Route::get('/hrms/payroll/hourly-payroll', [PayrollController::class, 'hourlyPayroll'])->name('hourlyPayroll.index');
-Route::get('/hrms/payroll/finalized-payroll', [PayrollController::class, 'finalizedPayroll'])->name('finalizedPayroll.index');
+Route::post('/hrms/payroll/hourly-payroll/fetch', [PayrollController::class, 'fetchHourly'])->name('hourly.fetch');
+Route::post('/hrms/payroll/hourly-payroll/save-row', [PayrollController::class, 'saveHourlyRow'])->name('hourly.saveRow');
+
 
 
 // Attendance Routes

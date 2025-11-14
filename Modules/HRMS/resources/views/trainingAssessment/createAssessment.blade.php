@@ -218,6 +218,70 @@
                 trigger.classList.add("active");
             }
         }
+function openEditModal(button) {
+    resetModal();  // Clear old fields
+
+    const id = button.dataset.id;
+    const assessment = button.dataset.assessment;
+
+    // Set modal title & button text
+    document.getElementById('modalTitle').textContent = "Edit MCQ";
+    document.getElementById('saveBtn').textContent = "💾 Update MCQ";
+
+    // Fill basic fields
+    document.getElementById('mcq_id').value = id;
+    document.getElementById('assessment_name').value = assessment;
+
+    // Fetch existing questions via AJAX
+    fetch(`/hrms/training-assessment/mcq/get/${id}`)
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) {
+                alert("Failed to load MCQ data");
+                return;
+            }
+
+            const questions = data.questions;
+            const mcqGroup = document.getElementById('mcqGroup');
+            mcqGroup.innerHTML = "";  // Clear blocks
+
+            questions.forEach((q, index) => {
+                const block = document.createElement("div");
+                block.classList.add("mcq-block");
+
+                block.innerHTML = `
+                    <div class="mcq-header">
+                        <h4>Question <span class="q-index">${index + 1}</span></h4>
+                        <button type="button" class="remove-btn" onclick="removeMcq(this)" title="Remove">&times;</button>
+                    </div>
+
+                    <label>Question</label>
+                    <textarea name="questions[${index}][question]" rows="2">${q.question}</textarea>
+
+                    <div class="options-grid">
+                        <div><label>Option A</label><input type="text" name="questions[${index}][option_a]" value="${q.option_a}"></div>
+                        <div><label>Option B</label><input type="text" name="questions[${index}][option_b]" value="${q.option_b}"></div>
+                        <div><label>Option C</label><input type="text" name="questions[${index}][option_c]" value="${q.option_c}"></div>
+                        <div><label>Option D</label><input type="text" name="questions[${index}][option_d]" value="${q.option_d}"></div>
+                    </div>
+
+                    <label>Correct Option</label>
+                    <select name="questions[${index}][correct_option]">
+                        <option value="A" ${q.correct_option === "A" ? "selected" : ""}>A</option>
+                        <option value="B" ${q.correct_option === "B" ? "selected" : ""}>B</option>
+                        <option value="C" ${q.correct_option === "C" ? "selected" : ""}>C</option>
+                        <option value="D" ${q.correct_option === "D" ? "selected" : ""}>D</option>
+                    </select>
+                `;
+
+                mcqGroup.appendChild(block);
+            });
+
+            // Open modal
+            mcqModal.style.display = 'flex';
+        })
+        .catch(err => console.error(err));
+}
 
     const mcqModal = document.getElementById('mcqModal');
     const openMcqBtn = document.getElementById('openAddMcq');

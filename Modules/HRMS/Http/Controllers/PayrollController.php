@@ -11,87 +11,159 @@ use Modules\HRMS\Models\PreJoiningEmployee;
 
 class PayrollController extends Controller
 {
+// salary slip methods
+//  public function salarySlipIndex(Request $request)
+//  {
+//     return view('hrms::payroll.salarySlipIndex');
+//  }
 
-    public function salarySlipIndex()
-    {
-        return view('hrms::payroll.salarySlipIndex');
+public function salaryslipshow(Request $request, $emp_id)
+{    
+    $from = $request->get('from');
+    $to   = $request->get('to');
+
+    // Fetch latest attendance record
+    $payroll = Attendance::where('employee_id', $emp_id)
+        ->orderBy('id', 'DESC')
+        ->first();
+
+    if (!$payroll) {
+        return abort(404, "No attendance records found!");
     }
 
-    public function searchEmployeeSalarySlip(Request $request)
-    {
-        $query = trim($request->get('query'));
+    // Count Present Days
+    $presentDays = Attendance::where('employee_id', $emp_id)
+        ->where('status', 'P')
+        ->count();
 
-        if (empty($query)) {
-            return response()->json([]);
-        }
+    // Half Days
+    $halfDays = Attendance::where('employee_id', $emp_id)
+        ->where('status', 'P')
+        ->where('is_half_day', true)
+        ->count();
 
-        $employees = OfferLetter::where('candidate_name', 'LIKE', "%{$query}%")
-            ->orWhere('candidate_id', 'LIKE', "%{$query}%")
-            ->limit(10)
-            ->get([
-                'id',
-                'candidate_name',
-                'candidate_id',
-                'designation',
-                'joining_date',
-                'ctc',
-            ]);
+    // Paid Leaves
+    $paidLeaves = Attendance::where('employee_id', $emp_id)
+        ->where('leave_type', 'paid leave')
+        ->count();
 
-        return response()->json($employees);
-    }
+    // Off Days
+    $offDays = Attendance::where('employee_id', $emp_id)
+        ->where('status', 'O')
+        ->count();
 
-    public function salarySlipStore(Request $request)
-    {
+    // Unpaid leaves
+    $unpaidLeaves = Attendance::where('employee_id', $emp_id)
+        ->where('leave_type', 'unpaid leave')
+        ->count();
+
+    // Absent Days
+    $absentDays = Attendance::where('employee_id', $emp_id)
+        ->where('status', 'A')
+        ->count();
+
+    // LOP
+    $lop = $absentDays + $unpaidLeaves;
+
+    // Paid Days
+    $paidDays = $presentDays + $paidLeaves + $offDays;
+
+    $paymentMonth = date("F Y", strtotime($from));
+
+    // Payment Date
+    $paymentDate = date("d-m-Y", strtotime($to));
+
+    return view('hrms::payroll.salarySlipIndex', compact(
+        'payroll',
+        'presentDays',
+        'halfDays',
+        'paidLeaves',
+        'offDays',
+        'paidDays',
+        'absentDays',
+        'unpaidLeaves',
+        'lop',
+        'paymentMonth',
+        'paymentDate'
+    ));
+}
+
+
+    /**
+     * Save Salary Slip
+     */
+public function salaryslipstore(Request $request)
+{
+    try {
 
         $validated = $request->validate([
-            'employee_id' => 'required|numeric',
-            'employee_name' => 'required|string|max:255',
-            'designation' => 'nullable|string|max:255',
-            'joining_date' => 'nullable|date',
-            'ctc' => 'nullable|numeric',
+            'employee_name'     => 'required|string|max:255',
+            'designation'       => 'nullable|string|max:255',
 
-            'payment_month' => 'required|string|max:15',
-            'payment_date' => 'nullable|date',
-            'days_present' => 'nullable|integer',
-            'days_paid' => 'nullable|integer',
-            'lop' => 'nullable|integer',
+            // Changed from date → string
+            'joining_date'      => 'nullable|string',
 
-            'basic_salary' => 'nullable|numeric',
-            'hra' => 'nullable|numeric',
-            'travel_allowance' => 'nullable|numeric',
+            'employee_id'       => 'required|string|max:50',
+
+            'ctc'               => 'nullable|numeric',
+
+            'payment_month'     => 'nullable|string',
+
+            // Changed from date → string
+            'payment_date'      => 'nullable|string',
+
+            'days_present'      => 'nullable|numeric',
+            'days_paid'         => 'nullable|numeric',
+            'lop'               => 'nullable|numeric',
+
+            'basic_salary'      => 'nullable|numeric',
+            'hra'               => 'nullable|numeric',
+            'travel_allowance'  => 'nullable|numeric',
             'special_allowance' => 'nullable|numeric',
             'performance_bonus' => 'nullable|numeric',
-            'total_earnings' => 'nullable|numeric',
 
-            'pf' => 'nullable|numeric',
-            'gratuity' => 'nullable|numeric',
-            'epf' => 'nullable|numeric',
-            'tds' => 'nullable|numeric',
-            'professional_tax' => 'nullable|numeric',
-            'total_deductions' => 'nullable|numeric',
-            'net_salary' => 'nullable|numeric',
+            'pf'                => 'nullable|numeric',
+            'gratuity'          => 'nullable|numeric',
+            'epf'               => 'nullable|numeric',
+            'tds'               => 'nullable|numeric',
+            'professional_tax'  => 'nullable|numeric',
 
-            'bank_name' => 'nullable|string|max:255',
-            'account_no' => 'nullable|string|max:255',
-            'ifsc_code' => 'nullable|string|max:50',
+            'total_earnings'    => 'nullable|numeric',
+            'total_deductions'  => 'nullable|numeric',
+            'net_salary'        => 'nullable|numeric',
         ]);
 
-        $salarySlip = SalarySlip::create($validated);
+        $salary = SalarySlip::create($validated);
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Salary slip saved successfully!',
-            'data' => $salarySlip
+            'message' => 'Salary slip saved successfully',
+            'data'   => $salary
         ]);
-    }
 
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'status' => 'validation_error',
+            'errors' => $e->errors()
+        ], 422);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+}
+
+
+   // monthly payroll methods
 
     public function monthlyPayroll()
-    { 
+    {
         return view('hrms::payroll.monthly');
     }
-    
-        public function fetch(Request $request)
+
+    public function fetch(Request $request)
     {
         $request->validate([
             'from_date' => 'required|date',
@@ -152,14 +224,111 @@ class PayrollController extends Controller
 
         return response()->json($results);
     }
-    
-    public function hourlyPayroll()
-    {
-        return view('hrms::payroll.hourly');
+
+// hourly payroll methods
+public function hourlyPayroll()
+{
+    return view('hrms::payroll.hourly');
+}
+public function fetchHourly(Request $request)
+{
+    $request->validate([
+        'from_date' => 'required|date',
+        'to_date'   => 'required|date'
+    ]);
+
+    $hourlyWage = 500;        // fixed
+    $standardPerDay = 9;      // 9 hours per day
+
+    // Count total days in date range
+    $days = (strtotime($request->to_date) - strtotime($request->from_date)) / 86400 + 1;
+
+    // Total standard hours for selected date range
+    $standardHoursTotal = $standardPerDay * $days;
+
+
+    // HELPER — Convert decimal hours →  "Xh Ym"
+    $convertHoursToHM = function ($hrs) {
+        $h = floor($hrs);
+        $m = round(($hrs - $h) * 60);
+        return "{$h}h {$m}m";
+    };
+
+
+    $employees = PreJoiningEmployee::select('id','first_name','last_name','designation')->get();
+    $results = [];
+
+    foreach ($employees as $emp) {
+
+        // Fetch attendance
+        $attendance = Attendance::where('employee_id', $emp->id)
+                                ->whereBetween('date', [$request->from_date, $request->to_date])
+                                ->get();
+
+        $totalWorkedRaw = 0;
+
+        foreach ($attendance as $row) {
+            if ($row->clock_in && $row->clock_out) {
+
+                $in  = strtotime($row->clock_in);
+                $out = strtotime($row->clock_out);
+
+                $totalWorkedRaw += ($out - $in) / 3600;
+            }
+        }
+
+
+        // ---- RAW DECIMAL HOURS FOR SALARY ----
+        $rawTotal   = round($totalWorkedRaw, 2);
+        $rawOver    = max(0, $rawTotal - $standardHoursTotal);
+
+        // ---- DISPLAY FORMAT (Hh Mm) ----
+        $totalWorkedDisplay = $convertHoursToHM($rawTotal);
+        $overtimeDisplay    = $convertHoursToHM($rawOver);
+        $standardHoursDisp  = $convertHoursToHM($standardHoursTotal);
+
+
+        // ✔ Salary calculations use raw decimals
+        $grossWages  = number_format($hourlyWage * $rawTotal, 2, '.', '');
+        $overtimePay = number_format($hourlyWage * $rawOver, 2, '.', '');
+
+
+        // ---- FINAL RESULT ----
+        $results[] = [
+            'emp_id'           => $emp->id,
+            'name'             => $emp->first_name . ' ' . $emp->last_name,
+            'department'       => $attendance->first()->department ?? 'N/A',
+            'designation'      => $emp->designation ?? 'N/A',
+
+            'hourly_wage'      => $hourlyWage,
+
+            // DISPLAY VALUES — Hh Mm
+            'standard_hours'   => $standardHoursDisp,
+            'total_hours'      => $totalWorkedDisplay,
+            'overtime_hours'   => $overtimeDisplay,
+
+            // Decimal values (salary)
+            'gross_wages'      => $grossWages,
+            'overtime_pay'     => $overtimePay,
+
+            'adjustment'       => 0,
+            'penalties'        => 0,
+            'loan_adv'         => 0,
+        ];
     }
 
-    public function finalizedPayroll()
-    {
-        return view('hrms::payroll.finalized');
-    }
+    return response()->json($results);
+}
+     
+
+public function saveHourlyRow(Request $request)
+{
+    return response()->json([
+        'status' => 'success',
+        'employee' => "Employee ID $request->emp_id"
+    ]);
+}
+
+
+
 }

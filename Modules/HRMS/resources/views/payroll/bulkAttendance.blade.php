@@ -177,7 +177,7 @@
                             value="{{ request('to_date') }}">
                     </div>
 
-                    <div class="bulk-filter-item">
+                    {{-- <div class="bulk-filter-item">
                         <label>Choose Branch</label>
                         <select id="bulk-branch" name="branch">
                             <option value="">Choose Branch</option>
@@ -186,7 +186,7 @@
                             <option value="Branch 2" {{ request('branch') == 'Branch 2' ? 'selected' : '' }}>Branch 2
                             </option>
                         </select>
-                    </div>
+                    </div> --}}
 
                     <button type="submit" id="bulk-btnSearch" class="bulk-btn btn-primary">
                         <i class="fa fa-magnifying-glass" style="margin-right:8px"></i>Search
@@ -295,6 +295,31 @@
     {{-- ✅ JAVASCRIPT --}}
    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+     // Sidebar toggle
+        function toggleMenu(header) {
+            const submenu = header.nextElementSibling;
+            const isOpen = submenu.classList.contains("open");
+            document.querySelectorAll('.submenu').forEach(menu => menu.classList.remove('open'));
+            document.querySelectorAll('.menu-section h3').forEach(menuHeader => menuHeader.classList.remove('active'));
+            if (!isOpen) {
+                submenu.classList.add("open");
+                header.classList.add("active");
+            }
+        }
+
+        function toggleDropdown(trigger) {
+            const container = trigger.nextElementSibling;
+            const isOpen = container.classList.contains("open");
+            trigger.parentElement.parentElement.querySelectorAll(".dropdown-container").forEach(drop => drop.classList
+                .remove("open"));
+            trigger.parentElement.parentElement.querySelectorAll(".dropdown-btn").forEach(btn => btn.classList.remove(
+                "active"));
+            if (!isOpen) {
+                container.classList.add("open");
+                trigger.classList.add("active");
+            }
+        }
+
 $(function () {
 
     /* ---------- Toast ---------- */
@@ -500,6 +525,33 @@ $(document).on('submit', '#markAttendanceForm', function (e) {
     });
 
 });   // <--- end of $(function(){ … })
+
+$(document).ready(function () {
+
+    // ---------- Disable Future Dates ----------
+    const today = new Date().toISOString().split("T")[0];
+
+    $("#from_date, #to_date").attr("max", today);
+
+    // ---------- Ensure "To Date" is not less than "From Date" ----------
+    $("#from_date").on("change", function () {
+        const from = $(this).val();
+        $("#to_date").attr("min", from);
+
+        // If 'to_date' is already smaller, correct it
+        if ($("#to_date").val() < from) {
+            $("#to_date").val(from);
+        }
+    });
+
+    // Optional: Ensure from_date doesn’t cross to_date  
+    $("#to_date").on("change", function () {
+        const to = $(this).val();
+        $("#from_date").attr("max", to);
+    });
+
+});
+
 </script>
 </body>
 </html>

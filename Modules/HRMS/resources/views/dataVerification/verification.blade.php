@@ -447,7 +447,7 @@
                 // Update candidate profile section dynamically
                 $('.profile-info34').html(`
                     <p><b>Name:</b> ${name}</p>
-                    <p><b>Employee ID:</b> ${id}</p>
+                    <p><b>Employee ID:</b> N/A</p>
                     <p><b>Department:</b> ${dept}</p>
                     <p><b>Joining Date:</b> N/A</p>
                 `);

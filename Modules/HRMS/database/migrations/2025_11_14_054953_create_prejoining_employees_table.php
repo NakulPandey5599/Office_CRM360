@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('prejoining_employees', function (Blueprint $table) {
             $table->id();
-             // 👇 Common for both
+              // 👇 Common for both
             $table->enum('experience_type', ['Fresher', 'Experienced'])->default('Fresher');
             $table->string('first_name');
             $table->string('last_name');
@@ -61,6 +61,7 @@ return new class extends Migration
             $table->json('experience_certificate')->nullable();
             $table->json('salary_slip')->nullable();
             $table->json('receiving_letter')->nullable();
+            
             $table->timestamps();
         });
     }

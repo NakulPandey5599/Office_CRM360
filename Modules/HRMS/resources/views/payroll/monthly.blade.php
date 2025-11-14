@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Monthly Payroll</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -53,9 +54,6 @@
             </div>
         </div>
 
-        <div class="payroll-note-box"><strong>Note:</strong> Payroll dates marked as finalized can't be selected...
-        </div>
-
         <!-- Table -->
 <table class="payroll-table">
   <thead>
@@ -74,6 +72,8 @@
       <th>Gross Wages</th>
       <th>Earned Wages</th>
       <th>Other Earnings</th>
+<th>Salary Slip</th>
+        
       
     </tr>
   </thead>
@@ -174,6 +174,13 @@
             <td>${emp.gross_wages}</td>
             <td>${emp.earned_wages}</td>
             <td>${emp.other_earnings}</td>
+            <td>
+    <button class="payroll-btn payroll-btn-primary"
+        onclick="openSalarySlip('${emp.emp_id}')">
+        <i class="fa fa-file-invoice"></i> View Slip
+    </button>
+</td>
+
           </tr>`;
                         });
                     })
@@ -183,7 +190,22 @@
                     });
             });
         });
-    </script>
+
+    function openSalarySlip(empId) {
+    const from = document.getElementById("from_date").value;
+    const to   = document.getElementById("to_date").value;
+
+    if (!from || !to) {
+        alert("Please select date range first!");
+        return;
+    }
+
+    const url = `/hrms/payroll/salary-slip/${empId}?from=${from}&to=${to}`;
+
+    window.open(url, "_blank");
+}
+
+    </script>   
 
 </body>
 

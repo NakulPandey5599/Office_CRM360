@@ -52,22 +52,23 @@ class SalarySlip extends Model
 
     // ✅ Casting for numeric fields
     protected $casts = [
-        'joining_date' => 'date',
-        'payment_date' => 'date',
-        'ctc' => 'decimal:2',
-        'basic_salary' => 'decimal:2',
-        'hra' => 'decimal:2',
-        'travel_allowance' => 'decimal:2',
-        'special_allowance' => 'decimal:2',
-        'performance_bonus' => 'decimal:2',
-        'pf' => 'decimal:2',
-        'gratuity' => 'decimal:2',
-        'epf' => 'decimal:2',
-        'tds' => 'decimal:2',
-        'professional_tax' => 'decimal:2',
-        'total_earnings' => 'decimal:2',
-        'total_deductions' => 'decimal:2',
-        'net_salary' => 'decimal:2',
-    ];
+    // REMOVE date casting, or change to string
+    
+    'ctc' => 'decimal:2',
+    'basic_salary' => 'decimal:2',
+    'hra' => 'decimal:2',
+    'travel_allowance' => 'decimal:2',
+    'special_allowance' => 'decimal:2',
+    'performance_bonus' => 'decimal:2',
+    'pf' => 'decimal:2',
+    'gratuity' => 'decimal:2',
+    'epf' => 'decimal:2',
+    'tds' => 'decimal:2',
+    'professional_tax' => 'decimal:2',
+    'total_earnings' => 'decimal:2',
+    'total_deductions' => 'decimal:2',
+    'net_salary' => 'decimal:2',
+];
+
 
 }

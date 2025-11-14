@@ -4,41 +4,69 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hourly Payroll</title>
-     <link rel="stylesheet" href="style.css">
+
+  <!-- REQUIRED FOR AJAX TO WORK -->
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
+  <link rel="stylesheet" href="{{ asset('css/app.css') }}">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
- <link rel="stylesheet" href="{{ asset('css/app.css') }}" />
+
+  <style>
+      /* your exact UI kept same */
+      .custom-table-uni input[type="number"] {
+        width: 100%;
+        height: 34px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        padding: 4px 6px;
+        text-align: right;
+        font-size: 14px;
+        color: #111827;
+        background-color: #fff;
+        font-family: "Poppins", sans-serif;
+      }
+      .custom-table-uni .saveRowBtn {
+        background-color: #2563eb;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 6px;
+      }
+  </style>
 </head>
+
+
 <body>
-
-
- {{-- @include('hrms::partials.sidebar') --}}
-
 <div class="main-content-uni">
   <div class="card-uni">
     <h2>Hourly Payroll</h2>
 
-    <div class="filters-uni">
-      <div class="filter-item-uni">
+    <div class="payroll-filters">
+      <div class="payroll-filter-item">
         <label>From</label>
-        <input type="date" value="2025-08-01">
+        <input type="date" id="from_date">
       </div>
 
-      <div class="filter-item-uni">
+      <div class="payroll-filter-item">
         <label>To</label>
-        <input type="date" value="2025-08-27">
+        <input type="date" id="to_date">
       </div>
 
-      <span style="align-self: flex-end; margin-bottom: 10px; padding: 0 8px; color: var(--text-primary); font-size: 14px;">27 Days</span>
+      <div class="payroll-filter-item">
+        <label>Days</label>
+        <div class="payroll-input-icon">
+          <input type="text" id="days_count" value="0" readonly>
+        </div>
+      </div>
 
-      <button class="btn-primary-uni">Search</button>
+      <button class="payroll-btn payroll-btn-primary" id="searchBtn">Search</button>
       <button class="btn-outline-uni">Export CSV</button>
       <button class="btn-outline-uni">Export PDF</button>
       <button class="btn-outline-uni">Finalize Payroll</button>
     </div>
   </div>
 
-  <div class="note-box-uni">
+ <div class="note-box-uni">
     <strong>Note:</strong> Payroll dates marked as frozen can't be selected or included in any date range and Changes will only be possible on unlocked data/records.
   </div>
 
@@ -48,7 +76,7 @@
 
   <table class="custom-table-uni">
     <thead>
-      <tr style="background:#1764e8;">
+      <tr style="background:#1764e8; color:#fff;">
         <th>Emp Id</th>
         <th>Name</th>
         <th>Department</th>
@@ -61,92 +89,165 @@
         <th>Overtime Pay</th>
         <th>Adjustment</th>
         <th>Penalties</th>
-        <th>Loan Advan</th>
+        <th>Loan Adv.</th>
+        <th>Action</th>
       </tr>
     </thead>
     <tbody id="hourlyTableBody-uni">
-      <tr>
-        <td>977</td>
-        <td>kashi ram banzara</td>
-        <td>purchase</td>
-        <td>HR</td>
-        <td>0.48</td>
-        <td>00h 00m</td>
-        <td>00h 00m</td>
-        <td>00h 00m</td>
-        <td>0</td>
-        <td>0</td>
-        <td>0</td>
-        <td>0</td>
-        <td>0</td>
-      </tr>
+      <tr><td colspan="14" style="text-align:center;">No data yet</td></tr>
     </tbody>
   </table>
 
-  <div class="pagination-uni" id="pagination-uni" ></div>
+  <div id="pagination-uni"></div>
 </div>
 
+<script>
 
- <script>
-function toggleMenuUni(header) {
-  const submenu = header.nextElementSibling;
-  const isOpen = submenu.classList.contains("open");
-
-  document.querySelectorAll('.submenu').forEach(menu => menu.classList.remove('open'));
-  document.querySelectorAll('.menu-section h3').forEach(menuHeader => menuHeader.classList.remove('active'));
-
-  if (!isOpen) {
-    submenu.classList.add("open");
-    header.classList.add("active");
-  }
+// ---------------- SAFE CSRF TOKEN ----------------
+function getCSRF() {
+    const t = document.querySelector('meta[name="csrf-token"]');
+    return t ? t.content : "";
 }
 
-function toggleDropdownUni(trigger) {
-  const container = trigger.nextElementSibling;
-  const isOpen = container.classList.contains("open");
+document.addEventListener("DOMContentLoaded", function () {
 
-  trigger.parentElement.parentElement.querySelectorAll(".dropdown-container").forEach(drop => drop.classList.remove("open"));
-  trigger.parentElement.parentElement.querySelectorAll(".dropdown-btn").forEach(btn => btn.classList.remove("active"));
+    const fromDate = document.getElementById("from_date");
+    const toDate = document.getElementById("to_date");
+    const daysCount = document.getElementById("days_count");
+    const tableBody = document.getElementById("hourlyTableBody-uni");
+    const searchBtn = document.getElementById("searchBtn");
 
-  if (!isOpen) {
-    container.classList.add("open");
-    trigger.classList.add("active");
-  }
-}
+    // ----------- DATE HANDLING -------------
+    const today = new Date().toISOString().split("T")[0];
+    fromDate.max = today;
+    toDate.max = today;
 
-// ================= Pagination =================
-function initHourlyPaginationUni() {
-  const rowsPerPage = 5;
-  const tbody = document.getElementById("hourlyTableBody-uni");
-  if (!tbody) return;
-  
-  const rows = tbody.querySelectorAll("tr");
-  const totalPages = Math.ceil(rows.length / rowsPerPage);
-  const pagination = document.getElementById("pagination-uni");
-  pagination.innerHTML = '';
+    const firstDay = new Date();
+    firstDay.setDate(1);
+    fromDate.value = firstDay.toISOString().split("T")[0];
+    toDate.value = today;
 
-  function showPage(page) {
-    rows.forEach((row, index) => {
-      row.style.display = (index >= (page-1)*rowsPerPage && index<page*rowsPerPage) ? "" : "none";
+    function updateDays() {
+        if (!fromDate.value || !toDate.value) return;
+        const start = new Date(fromDate.value);
+        const end = new Date(toDate.value);
+
+        if (end < start) {
+            toDate.value = fromDate.value;
+            daysCount.value = 1;
+            return;
+        }
+
+        const diff = Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
+        daysCount.value = diff;
+    }
+
+    fromDate.addEventListener("change", updateDays);
+    toDate.addEventListener("change", updateDays);
+    updateDays();
+
+    // ========== FETCH HOURLY PAYROLL ==========
+    searchBtn.addEventListener("click", function () {
+
+        const from = fromDate.value;
+        const to = toDate.value;
+
+        if (!from || !to) {
+            alert("Select both dates");
+            return;
+        }
+
+        tableBody.innerHTML = `<tr><td colspan="14" style="text-align:center;">Loading...</td></tr>`;
+
+        fetch("{{ route('hourly.fetch') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": getCSRF()
+            },
+            body: JSON.stringify({ from_date: from, to_date: to })
+        })
+        .then(res => res.json())
+        .then(data => {
+
+            if (!data.length) {
+                tableBody.innerHTML = `<tr><td colspan="14" style="text-align:center;">No Data Found</td></tr>`;
+                return;
+            }
+
+            tableBody.innerHTML = "";
+
+            data.forEach(emp => {
+                tableBody.innerHTML += `
+<tr>
+    <td>${emp.emp_id}</td>
+    <td>${emp.name}</td>
+    <td>${emp.department}</td>
+    <td>${emp.designation.replace(/[\[\]"]/g, '')}</td>
+
+    <td>${emp.hourly_wage} ₹</td>
+
+    <td>${emp.standard_hours} </td>
+    <td>${emp.overtime_hours} </td>
+    <td>${emp.total_hours} </td>
+
+    <td>${emp.gross_wages} ₹</td>
+    <td>${emp.overtime_pay} ₹</td>
+
+    <td>${emp.adjustment} ₹</td>
+    <td>${emp.penalties} ₹</td>
+    <td>${emp.loan_adv} ₹</td>
+
+    <td><button class="saveRowBtn" data-id="${emp.emp_id}">💾 Save</button></td>
+</tr>`;
+
+            });
+
+            document.querySelectorAll(".saveRowBtn").forEach(btn => {
+                btn.addEventListener("click", function() {
+                    saveHourlyRow(this.closest("tr"));
+                });
+            });
+
+        })
+        .catch(() => {
+            tableBody.innerHTML = `<tr><td colspan="14" style="text-align:center;color:red;">Error fetching data</td></tr>`;
+        });
     });
-    pagination.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
-    const activeBtn = pagination.querySelector(`button[data-page="${page}"]`);
-    if(activeBtn) activeBtn.classList.add('active');
-  }
 
-  for(let i=1;i<=totalPages;i++){
-    const btn = document.createElement("button");
-    btn.textContent = i;
-    btn.setAttribute("data-page",i);
-    if(i===1) btn.classList.add("active");
-    btn.addEventListener("click",()=>showPage(i));
-    pagination.appendChild(btn);
-  }
+    // ========== SAVE HOURLY ROW ==========
+    function saveHourlyRow(row) {
 
-  showPage(1);
-}
+        const empId = row.querySelector(".saveRowBtn").dataset.id;
 
-document.addEventListener('DOMContentLoaded', initHourlyPaginationUni);
+        const payload = {
+            emp_id: empId,
+            adjustment:  row.querySelector(".adjustment").value,
+            penalties:   row.querySelector(".penalties").value,
+            loan_adv:    row.querySelector(".loan-adv").value
+        };
+
+        fetch("{{ route('hourly.saveRow') }}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": getCSRF()
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(resp => {
+            if (resp.status === "success") {
+                alert(`Saved Payroll for ${resp.employee}`);
+            } else {
+                alert("Save failed");
+            }
+        })
+        .catch(() => alert("Server error while saving."));
+    }
+
+});
+
 </script>
 
 </body>

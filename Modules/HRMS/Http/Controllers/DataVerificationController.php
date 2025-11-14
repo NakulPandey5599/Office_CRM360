@@ -25,13 +25,6 @@ class DataVerificationController extends Controller
         return view('hrms::dataVerification.verification', compact('dataVerification', 'prejoining'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('hrms::create');
-    }
 
     /**
      * Store verification details and send email.
@@ -144,25 +137,28 @@ class DataVerificationController extends Controller
      */
     public function searchExperiencedEmployee(Request $request)
     {
-        $query = $request->get('query');
+     $query = $request->get('query');
 
-        // ✅ Unified search in prejoining_employees
-        $results = DB::table('prejoining_employees')
-            ->where('first_name', 'LIKE', "%{$query}%")
-            ->orWhere('last_name', 'LIKE', "%{$query}%")
-            ->orWhere('job_profile', 'LIKE', "%{$query}%")
-            ->limit(10)
-            ->get(['id', 'first_name', 'last_name', 'job_profile']);
+     $results = DB::table('prejoining_employees')
+        ->where('experience_type', 'experienced')   // filter first
+        ->where(function ($q) use ($query) {
+            $q->where('first_name', 'LIKE', "%{$query}%")
+              ->orWhere('last_name', 'LIKE', "%{$query}%")
+              ->orWhere('job_profile', 'LIKE', "%{$query}%");
+        })
+        ->limit(10)
+        ->get(['id', 'first_name', 'last_name', 'job_profile']);
 
-        return response()->json($results);
-    }
+     return response()->json($results);
+     }
+
 
     /**
      * Get verification details by candidate ID
      */
     public function getCandidateVerification($id)
     {
-        $verification = DataVerification::where('id', $id)->latest()->first();
+        $verification = DataVerification::where('candidate_id', $id)->latest()->first();
 
         if (!$verification) {
             return response()->json(['error' => 'No verification data found'], 404);

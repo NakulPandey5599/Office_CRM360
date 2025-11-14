@@ -30,7 +30,7 @@ public function index()
     public function createModule()
     {
         // Fetch only the most recent module
-        $latestModule = TrainingModule::latest()->first();
+        $latestModule = TrainingModule::where('is_active', 1)->first();
         $allModules = TrainingModule::orderBy('created_at', 'desc')->get();
 
         return view('hrms::trainingAssessment.create', compact('latestModule', 'allModules'));
@@ -220,16 +220,25 @@ public function store(Request $request)
         return response()->json(['success' => true, 'message' => 'MCQ updated successfully!']);
     }
 
-    public function getMcq($id)
-    {
-        $mcq = TrainingMcq::find($id);
+public function getMcq($id)
+{
+    $mcq = TrainingMcq::find($id);
 
-        if (!$mcq) {
-            return response()->json(['error' => 'MCQ not found'], 404);
-        }
-
-        return response()->json($mcq);
+    if (!$mcq) {
+        return response()->json([
+            'success' => false,
+            'message' => 'MCQ not found'
+        ], 404);
     }
+
+    return response()->json([
+        'success' => true,
+        'assessment_name' => $mcq->assessment_name,
+        'status' => $mcq->status,
+        'questions' => $mcq->questions   // This is already JSON field
+    ]);
+}
+
 
     public function getAssessmentMcqs($assessment_name)
     {
@@ -333,5 +342,13 @@ public function toggleStatusModules($id)
         ], 500);
     }
 }
+
+public function getActiveModule()
+{
+    $active = TrainingModule::where('is_active', 1)->first();
+    return response()->json($active);
+}
+
+
 
 }

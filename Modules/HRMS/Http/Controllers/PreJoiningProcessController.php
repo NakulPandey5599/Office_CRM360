@@ -58,13 +58,7 @@ class PreJoiningProcessController extends Controller
     }
 
     public function store(Request $request)
-    {      dd([
-    'files' => array_keys($request->allFiles()),
-    'has_university_docs' => $request->hasFile('university_documents'),
-    'university_docs' => $request->file('university_documents'),
-    'has_receiving' => $request->hasFile('receiving_letter'),
-    'receiving' => $request->file('receiving_letter'),
-]);
+    {     
 
         // 🔒 Prevent direct access (only logged-in candidates allowed)
         if (!Session::has('candidate_id')) {
@@ -199,7 +193,7 @@ if ($request->hasFile('receiving_letter')) {
 
         ]);
 
-        return redirect()->back()->with('success', "{$request->experience_type} employee saved successfully!");
+        return redirect()->back()->with('success', "{$request->first_name}  saved successfully!");
     }
 
     public function search(Request $request)
@@ -219,7 +213,7 @@ if ($request->hasFile('receiving_letter')) {
     public function listing()
 {
     // Fetch all pre-joining employees
-    $employees = \Modules\HRMS\Models\PreJoiningEmployee::latest()->get();
+    $employees = PreJoiningEmployee::latest()->get();
 
     // Pass to a view
     return view('hrms::preJoiningProcess.listing', compact('employees'));

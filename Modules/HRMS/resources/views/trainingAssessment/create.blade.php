@@ -585,6 +585,8 @@
                 }
 
                 showAlert('Status updated!');
+                await refreshActiveModuleUI();
+
 
             } catch (err) {
                 console.error(err);
@@ -593,6 +595,49 @@
                 btn.disabled = false;
             }
         });
+
+async function refreshActiveModuleUI() {
+    try {
+        const res = await fetch('/hrms/training/get-active');
+        const data = await res.json();
+
+        const container = document.querySelector('.video-container');
+        const details = document.querySelector('.module-details');
+
+        if (!data) {
+            container.style.display = "none";
+            details.style.display = "none";
+            return;
+        }
+
+        // Update video
+        const video = document.getElementById('trainingVideo');
+        if (video) {
+            video.src = data.video_path;
+            container.style.display = "block";
+        }
+
+        // Update text fields
+        details.querySelector('p:nth-child(1)').innerHTML =
+            `<strong>Module Description:</strong> ${data.description}`;
+
+        details.querySelector('p:nth-child(2)').innerHTML =
+            `<strong>Duration:</strong> ${data.duration ?? 'N/A'}`;
+
+        // Update status button
+        const latestBtn = details.querySelector('.status-toggle-btn');
+        latestBtn.dataset.id = data.id;
+        latestBtn.dataset.status = data.is_active ? "active" : "inactive";
+        latestBtn.textContent = data.is_active ? "Active" : "Inactive";
+
+        latestBtn.classList.remove("status-active", "status-inactive");
+        latestBtn.classList.add(data.is_active ? "status-active" : "status-inactive");
+
+    } catch (e) {
+        console.error("Failed to live refresh:", e);
+    }
+}
+
     </script>
 
 </body>

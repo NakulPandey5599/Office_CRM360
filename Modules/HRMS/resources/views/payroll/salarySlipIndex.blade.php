@@ -15,60 +15,7 @@
     <!-- External CSS -->
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <style>
-        .search-bar {
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
 
-        .search-bar input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        .search-button {
-            background-color: #2b6cb0;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            padding: 8px 12px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .search-button:hover {
-            background-color: #1a4f8a;
-        }
-
-        .suggestions-list {
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            max-height: 200px;
-            overflow-y: auto;
-            list-style: none;
-            margin: 4px 0 0;
-            padding: 0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 99999;
-            /* highest priority */
-        }
-
-        .suggestions-list li {
-            padding: 8px 10px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .suggestions-list li:hover {
-            background-color: #f3f4f6;
-        }
-    </style>
 </head>
 
 <body>
@@ -110,16 +57,8 @@
         <div class="document-title">
             <h1>SALARY SLIP</h1>
             <div class="employee-info">
-                <label for="employeeSearch" class="data-label">Search Employee:</label>
-                <div class="search-bar">
-                    <input type="text" id="employeeSearch" class="employee-name-input"
-                        placeholder="Type employee name or ID..." onkeyup="searchEmployee(this.value)"
-                        autocomplete="off">
-                    <button type="button" class="search-button" onclick="performSearch()">
-                        <i class="fas fa-search"></i>
-                    </button>
-                    <ul id="employeeSuggestions" class="suggestions-list"></ul>
-                </div>
+                <span class="data-label">Employee Name:</span>
+                <input type="text" class="data-value" name="employee_name" value="{{ $payroll->employee_name }}">
             </div>
 
         </div>
@@ -129,50 +68,53 @@
                 <h3>Employee Information</h3>
                 <div class="data-row">
                     <span class="data-label">Employee Name</span>
-                    <input type="text" name="employee_name" class="data-value highlight-text" data-field="name">
+                    <input type="text" class="data-value" name="employee_name" value="{{ $payroll->employee_name }}">
                 </div>
+
                 <div class="data-row">
                     <span class="data-label">Designation</span>
-                    <input type="text" name="designation" class="data-value" data-field="designation">
+                    <input type="text" class="data-value" name="designation" value="{{ $payroll->designation }}">
                 </div>
+
+
                 <div class="data-row">
                     <span class="data-label">Date of Joining</span>
-                    <input type="text" name="joining_date" class="data-value" data-field="joining_date">
+                    <input type="text" class="data-value" name="joining_date">
                 </div>
+
                 <div class="data-row">
                     <span class="data-label">Employee ID</span>
-                    <input type="text" name="employee_id" class="data-value" data-field="employee_id">
+                    <input type="text" class="data-value" name="employee_id" value="{{ $payroll->employee_id }}">
                 </div>
+
                 <div class="data-row">
                     <span class="data-label">CTC</span>
-                    <input type="text" name="ctc" class="data-value" data-field="ctc">
+                    <input type="text" class="data-value" name="ctc">
                 </div>
-
-
             </div>
 
             <div class="info-panel">
                 <h3>Payroll Details</h3>
-               <div class="data-row">
-          <span class="data-label">Payment Month</span>
-          <input type="text" class="data-value" >
-        </div>
-        <div class="data-row">
-          <span class="data-label">Payment Date</span>
-          <input type="text" class="data-value">
-        </div>
+                <div class="data-row">
+                    <span class="data-label">Payment Month</span>
+                    <input type="text" class="data-value" name="payment_month" value="{{ $paymentMonth }}">
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Payment Date</span>
+                    <input type="text" class="data-value" name="payment_date" value="{{ $paymentDate }} ">
+                </div>
 
                 <div class="data-row">
                     <span class="data-label">Days Present</span>
-                    <input type="text" name="days_present" class="data-value" value="31">
+                    <input type="text" class="data-value" name="days_present" value="{{ $presentDays }}">
                 </div>
                 <div class="data-row">
                     <span class="data-label">Days Paid</span>
-                    <input type="text" name="days_paid" class="data-value" value="31">
+                    <input type="text" class="data-value" name="days_paid" value="{{ $paidDays }}">
                 </div>
                 <div class="data-row">
                     <span class="data-label">LOP</span>
-                    <input type="text" name="lop" class="data-value" value="0">
+                    <input type="text" class="data-value" name="lop" value="{{ $lop }}">
                 </div>
             </div>
         </div>
@@ -293,155 +235,10 @@
         </div>
     </div>
 
-    <!-- External JavaScript -->
-    <script src="script.js"></script>
+  
 
 
     <script>
-        // Function to save form data to localStorage
-        function saveFormData() {
-            const inputs = document.querySelectorAll('input[type="text"]');
-            const formData = {};
-
-            inputs.forEach(input => {
-                formData[input.parentElement.textContent.trim() || input.previousElementSibling.textContent
-                    .trim()] = input.value;
-            });
-
-            localStorage.setItem('salarySlipData', JSON.stringify(formData));
-            alert('Data saved successfully!');
-        }
-
-        // Function to load form data from localStorage
-        function loadFormData() {
-            const savedData = localStorage.getItem('salarySlipData');
-            if (savedData) {
-                const formData = JSON.parse(savedData);
-                const inputs = document.querySelectorAll('input[type="text"]');
-
-                inputs.forEach(input => {
-                    const key = input.parentElement.textContent.trim() || input.previousElementSibling.textContent
-                        .trim();
-                    if (formData[key]) {
-                        input.value = formData[key];
-                    }
-                });
-            }
-        }
-
-        // Load saved data when page loads
-        window.addEventListener('DOMContentLoaded', loadFormData);
-
-
-
-        document.addEventListener("DOMContentLoaded", function() {
-            const searchInput = document.getElementById("employeeSearch");
-            const suggestionsList = document.getElementById("employeeSuggestions");
-
-            // Move suggestions list directly under <body> to avoid clipping
-            document.body.appendChild(suggestionsList);
-
-            // Keep it hidden by default
-            suggestionsList.style.display = "none";
-
-            // 🔍 Trigger live search as user types
-            searchInput.addEventListener("keyup", function(e) {
-                const query = e.target.value.trim();
-
-                // If Enter key is pressed
-                if (e.key === "Enter") {
-                    performSearch(query);
-                } else {
-                    // Live suggestions after typing 2+ characters
-                    if (query.length >= 2) {
-                        searchEmployee(query);
-                    } else {
-                        suggestionsList.style.display = "none";
-                    }
-                }
-            });
-
-            // Recalculate position on scroll or resize
-            window.addEventListener("scroll", positionSuggestionsList);
-            window.addEventListener("resize", positionSuggestionsList);
-        });
-
-        // 📍 Dynamically position suggestions under the input field
-        function positionSuggestionsList() {
-            const input = document.getElementById("employeeSearch");
-            const list = document.getElementById("employeeSuggestions");
-            const rect = input.getBoundingClientRect();
-
-            list.style.position = "fixed";
-            list.style.top = rect.bottom + 5 + "px";
-            list.style.left = rect.left + "px";
-            list.style.width = rect.width + "px";
-            list.style.zIndex = 99999;
-        }
-
-        // 🔧 Triggered when Enter key or Search button pressed
-        function performSearch(query = null) {
-            const input = document.getElementById("employeeSearch");
-            query = query || input.value.trim();
-
-            if (query.length < 2) {
-                alert("Please type at least 2 characters to search.");
-                return;
-            }
-
-            searchEmployee(query);
-        }
-
-        // 🧠 Fetch employee list via AJAX
-        function searchEmployee(query) {
-            const list = document.getElementById("employeeSuggestions");
-            list.innerHTML = '<li>Searching...</li>';
-            list.style.display = "block";
-            positionSuggestionsList();
-
-            fetch(`/hrms/payroll/salary-slip/search?query=${encodeURIComponent(query)}`)
-                .then((response) => response.json())
-                .then((data) => {
-                    list.innerHTML = "";
-
-                    if (data.length === 0) {
-                        list.innerHTML = '<li>No results found</li>';
-                        return;
-                    }
-
-                    // ✅ Auto-fill if only one match found
-                    if (data.length === 1) {
-                        selectEmployee(data[0]);
-                        list.style.display = "none";
-                        return;
-                    }
-
-                    // 🧾 Render all results
-                    data.forEach((emp) => {
-                        const li = document.createElement("li");
-                        li.textContent = `${emp.candidate_name} (${emp.candidate_id})`;
-                        li.onclick = () => {
-                            selectEmployee(emp);
-                            list.style.display = "none";
-                        };
-                        list.appendChild(li);
-                    });
-                })
-                .catch((err) => {
-                    console.error("Search error:", err);
-                    list.innerHTML = '<li>Error fetching data</li>';
-                });
-        }
-
-        // ✍️ Fill employee data in Salary Slip inputs
-        function selectEmployee(emp) {
-            document.querySelector(".employee-name-input").value = emp.candidate_name;
-            document.querySelector('input[data-field="name"]').value = emp.candidate_name;
-            document.querySelector('input[data-field="designation"]').value = emp.designation;
-            document.querySelector('input[data-field="joining_date"]').value = emp.joining_date;
-            document.querySelector('input[data-field="employee_id"]').value = emp.candidate_id;
-            document.querySelector('input[data-field="ctc"]').value = emp.ctc;
-        }
         // 🧮 Auto-calculate totals accurately and format numbers
         function calculateTotals() {
             const earningRows = document.querySelectorAll('#earnings-deductions tr:not(.summary-row)');
@@ -501,53 +298,74 @@
 
         //save 
         // 💾 Save Salary Slip Data to Database
+
 function saveFormData() {
-    // Create a FormData object to send all inputs easily
+
     const formData = new FormData();
 
-    // Collect all input values (text, date, month)
-    document.querySelectorAll('input').forEach(input => {
-        const nameAttr = input.getAttribute('data-field') || input.getAttribute('name');
-        if (nameAttr) {
-            formData.append(nameAttr, input.value);
-        }
+    // Collect all inputs that have NAME attribute only
+    document.querySelectorAll('input[name]').forEach(input => {
+        let value = input.value.replace(/[₹,]/g, '').trim();
+        formData.append(input.name, value);
     });
 
-    // Add totals separately
-    const totalEarnings = document.querySelector('.summary-row td:nth-child(2) input').value.replace(/,/g, '');
-    const totalDeductions = document.querySelector('.summary-row td:nth-child(4) input').value.replace(/,/g, '');
-    const netSalary = document.querySelector('.total-value').value.replace(/[₹,]/g, '');
+    // Add totals safely
+    formData.append('total_earnings',
+        document.querySelector('[name="total_earnings"]').value.replace(/,/g, '') || 0
+    );
 
-    formData.append('total_earnings', totalEarnings || 0);
-    formData.append('total_deductions', totalDeductions || 0);
-    formData.append('net_salary', netSalary || 0);
+    formData.append('total_deductions',
+        document.querySelector('[name="total_deductions"]').value.replace(/,/g, '') || 0
+    );
 
-    // CSRF token for Laravel
+    formData.append('net_salary',
+        document.querySelector('[name="net_salary"]').value.replace(/[₹,]/g, '') || 0
+    );
+
+    // CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
-    // 🔥 Send data to Laravel controller
-    fetch('{{ route("salaryslip.store") }}', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': csrfToken
-        },
+    // SEND TO LARAVEL
+    fetch("{{ route('salaryslip.store') }}", {
+
+        method: "POST",
+      headers: {
+    "X-CSRF-TOKEN": csrfToken,
+    "Accept": "application/json"
+},
         body: formData
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === 'success') {
-            alert('✅ Salary Slip saved successfully!');
-            console.log('Saved:', data);
-        } else {
-            alert('❌ Error saving data. Check console.');
-            console.error(data);
-        }
-    })
-    .catch(err => {
-        alert('⚠️ Something went wrong while saving.');
-        console.error('Save error:', err);
-    });
+    .then(async res => {
+    const contentType = res.headers.get("content-type");
+
+    // If response is NOT JSON → print raw HTML
+    if (!contentType || !contentType.includes("application/json")) {
+        const text = await res.text();
+        console.error("❌ Server returned HTML instead of JSON:", text);
+        alert("Server returned non-JSON — check console.");
+        return;
+    }
+
+    const data = await res.json();
+
+    // Laravel validation failed
+    if (res.status === 422) {
+        console.log("❌ Validation Errors:", data.errors);
+        alert("Validation failed. Check console.");
+        return;
+    }
+
+    if (data.status === "success") {
+        alert("Saved successfully!");
+    } else {
+        console.log(data);
+        alert("Something went wrong.");
+    }
+})
+.catch(err => console.error(err));
+
 }
+
 
     </script>
 </body>

@@ -71,5 +71,4 @@ class PreJoiningEmployee extends Model
         'receiving_letter' => 'array',
     ];
 
-   
 }

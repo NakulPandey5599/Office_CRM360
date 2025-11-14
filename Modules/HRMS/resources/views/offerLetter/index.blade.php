@@ -128,23 +128,22 @@
                             <input type="text" id="offerCandIdInput" name="candidate_id">
                         </div>
                         <div class="offer-form-group"><label>Candidate Name</label>
-                            <input type="text" id="offerNameInput" name="candidate_name" value="Rohit Kumar">
+                            <input type="text" id="offerNameInput" name="candidate_name" >
                         </div>
                         <div class="offer-form-group"><label>Designation</label>
-                            <input type="text" id="offerDesignationInput" name="designation"
-                                value="Sales Executive">
+                            <input type="text" id="offerDesignationInput" name="designation">
                         </div>
                         <div class="offer-form-group"><label>Department</label>
-                            <input type="text" id="offerDeptInput" name="department" value="Sales">
+                            <input type="text" id="offerDeptInput" name="department">
                         </div>
                         <div class="offer-form-group"><label>Joining Date</label>
-                            <input type="date" id="offerDateInput" name="joining_date" value="2025-03-10">
+                            <input type="date" id="offerDateInput" name="joining_date">
                         </div>
                         <div class="offer-form-group"><label>Location</label>
-                            <input type="text" id="offerLocationInput" name="location" value="Mumbai">
+                            <input type="text" id="offerLocationInput" name="location">
                         </div>
                         <div class="offer-form-group"><label>CTC</label>
-                            <input type="text" id="offerCtcInput" name="ctc" value="INR 8,00,000">
+                            <input type="text" id="offerCtcInput" name="ctc">
                         </div>
                         <button type="button" class="offer-btn-primary" onclick="offerShowPreview()">Generate Offer
                             Letter</button>
